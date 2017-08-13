@@ -1,0 +1,194 @@
+$redBG: hsl(6, 100%, 15%);
+$redFG: hsl(6, 100%, 5%);
+$tanBG: hsl(40, 100%, 97%);
+
+body {
+  background: linear-gradient(to bottom right, #000, $redBG) no-repeat;
+  background-size: 400vw 400vh;
+  height: 100vh;
+  width: 100vw;
+  animation: 10s alternate infinite bgAnim ease-in-out;
+  overflow: hidden;
+  color: $redFG;
+  font-family: 'Crimson', serif;
+}
+
+main {
+  top: 6vh;
+  bottom: 6vh;
+  left: 4vw;
+  right: 4vw;
+  position: fixed;
+  padding: 2vw;
+  overflow: hidden;
+}
+
+button, a {
+  position: absolute;
+  background: $tanBG;
+  border: 1px solid $redBG;
+  color: $redFG;
+  font-size: 20px;
+  font-family: 'Crimson', serif;
+  padding: 1px 6px;
+  text-decoration: none;
+  &:focus {
+    outline: 0;
+    box-shadow: 0 0 3px $redFG;
+  }
+}
+
+#quotes {
+  position: static;
+  // font-size: 5em;
+  font-size: 8vw;
+  overflow: hidden;
+  #newQuote {
+    bottom: 0;
+    left: 2vw;
+  }
+  #share {
+    bottom: 0;
+    right: 2vw;
+  }
+  blockquote {
+    padding: 3vw;
+    max-width: 100%;
+    position: absolute;
+    overflow-y: auto;
+    overflow-x: hidden;
+    top: 1vh;
+    left: 1vw;
+    right: 1vw;
+    bottom: 1vh;
+    background: $tanBG;
+    border: 1px solid $redBG;
+    cite {
+      position: absolute;
+      bottom: 4vh;
+      right: 4vw;
+      font-size: 24px;
+      font-variant: petite-caps;
+      &:before {
+        content: '\2015';
+        // content: '\2E3A';
+        // https://english.stackexchange.com/questions/28601/appropriate-dash-to-use-when-attributing-a-quotation
+      }
+    }
+  }
+}
+#loadIndicator {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  transition: all 500ms ease-in-out;
+  &.loading {
+    background: rgba(255, 255, 255, 0.4);
+    div {
+      position: absolute;
+      top: calc(50vh - 30px);
+      left: calc(50vw - 30px);
+      height: 60px;
+      width: 60px;
+      border: 2px solid $redFG;
+      border-bottom-color: transparent;
+      border-top-color: transparent;
+      border-radius: 90% 0%;
+      // background: rgba(0,0,0,0.4);
+      box-sizing: border-box;
+      &:nth-child(1) {
+        animation: rotate 1.5s 0s linear normal infinite;
+      }
+      &:nth-child(2) {
+        animation: rotate 1.5s 0.5s linear normal infinite;
+      }
+      &:nth-child(3) {
+        animation: rotate 1.5s 1.0s linear normal infinite;
+      }
+      &:nth-child(4) {
+        animation: unset;
+        border-color: $redFG;
+        border-radius: 100%;
+        width: 40px;
+        height: 40px;
+        top: calc(50vh - 20px);
+        left: calc(50vw - 20px);
+      }
+      &:nth-child(5) {
+        animation: rotate 1.5s 0s ease-in-out normal infinite;
+        border-radius: 100%;
+        border-width: 1px;
+        width: 30px;
+        height: 30px;
+        top: calc(50vh - 15px);
+        left: calc(50vw - 15px);
+      }
+      &:nth-child(6) {
+        animation: rotate 1.5s 0s ease-in-out reverse infinite;
+        border-width: 1px;
+        border-radius: 100%;
+        width: 20px;
+        height: 20px;
+        top: calc(50vh - 10px);
+        left: calc(50vw - 10px);
+      }
+    }
+  }
+}
+.wipe {
+  mask: linear-gradient(
+    135deg,
+    black,
+    black 45%,
+    transparent 50%,
+    transparent 55%,
+    transparent 100%
+  );
+  mask-size: 400vw 100vh;
+  mask-type: alpha;
+  mask-repeat: no-repeat;
+  mask-position: -100vw 0;
+  animation: 2000ms alternate forwards maskMove ease-in-out;
+}
+
+@keyframes maskMove {
+  from {
+    mask-size: 400vw 100vh;
+  }
+  to {
+    mask-size: 0 100vh;
+  }
+}
+
+@keyframes bgAnim {
+  0% {
+    background-position: 0vw 0vh;
+  }
+  25% {
+    background-position: -300vw -300vh;
+  }
+  50% {
+    background-position: -300vw 0vh;
+  }
+  75% {
+    background-position: 0vw -300vh;
+  }
+  100% {
+    background-position: 0vw 0vh;
+  }
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
