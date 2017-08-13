@@ -1,0 +1,45 @@
+div {
+    position: fixed;
+    border: 1px solid transparent;
+    color: white;
+    padding: 0.5em;
+    font-weight: 700;
+    font-size: 24px;
+    font-family: 'Montserrat', sans-serif;
+  }
+  #hello {
+    background: red;
+    top: 3em;
+    right: 4em;
+    animation: 100ms 5s 3 alternate wiggleY;
+    // animation-name: wiggleY;
+    // animation-duration: 100ms;
+    // animation-delay: 5s;
+    // animation-iteration-count: 3;
+    // animation-direction: alternate;
+  }
+
+  #hi {
+    background: blue;
+    top: 6em;
+    left: 4em;
+  }
+
+  #sphinx {
+    background: red;
+    top: 9em;
+    right: 4em;
+  }
+  #no {
+    background: blue;
+    top: 12em;
+    left: 4em;
+  }
+
+  @keyframes wiggleY {
+    0% { transform: tranaslatey(0%); }
+    // 25% { transform: translatey(10%); }
+    // 50% { transform: translatey(5%); }
+    // 75% { transform: translatey(10%); }
+    100% { transform: translatey(-8%); }
+  }
