@@ -1,0 +1,28 @@
+html {
+    height: 100vh;
+  }
+  body {
+    background: fixed
+      black
+      url('http://source.unsplash.com/twukN12EN7c')
+      // url('http://source.unsplash.com/Kwi60PbAM9I')
+      bottom
+      center/cover
+      no-repeat;
+  }
+  .jumbotron {
+    background: linear-gradient(rgba(0, 0, 0, 1), rgba(255, 255, 255, 0));
+    color: #FAFAFA;
+  }
+  .card {
+    background: rgba(0, 0, 0, 0.85);
+    color: #FAFAFA;
+  }
+  #headshot {
+    width: 30%;
+  }
+
+  .img-thumbnail {
+    background: rgba(0,0,0,0.5);
+    border-color: black;
+  }

@@ -1,0 +1,37 @@
+.jumbotron.jumbotron-fluid
+  .container-fluid
+    .row
+      .col-10.offset-1
+        //Ghetto responsiveness 'cause Bootstrap 4 doesn't have responsive display headers.. https://github.com/twbs/bootstrap/issues/22104
+        h1.display-1.hidden-md-down John Carmack
+        h1.display-2.hidden-sm-down.hidden-lg-up John Carmack
+        h1.display-3.hidden-xs-down.hidden-md-up John Carmack
+        h1.display-4.hidden-sm-up John Carmack
+        p.lead Note to self: Pasty-skinned programmers ought not stand in the Mojave desert for multiple hours.
+.container-fluid
+  .row.mb-4
+    .col-sm-10.offset-sm-1.col-md-8.offset-md-2
+      .card
+        .card-block
+          img(src='https://res.cloudinary.com/crunchbase-production/image/upload/v1397633726/9eea1314ab996886645f7a9787b0b458.jpg')#headshot.float-right.img-thumbnail.ml-4
+          p A very important influence in modern game programming, John Carmack was the lead programmer on numerous games that helped revolutionize how modern game engines handle graphics.
+          blockquote.blockquote
+            p In the information age, the barriers just aren't there. The barriers are self imposed.
+            footer.blockquote-footer #[cite #[a(href='#') John Carmack]]
+          p.mb-0 Carmack made many hugely influential games, establishing the entire First Person Shooter genre. Some of his games include:
+            ul
+              li Doom
+              li Wolfenstein 3D
+              li Commander Keen
+          p Most recently, he has worked with Oculus, a company building a Virtual Reality headset, to help usher gaming into the next era of perspective like he did with the original first-person games. In addition to his massive expertise in game and graphics programming, John Carmack has taken a deep interest in Aerospace and Rocket Science, spending much of his time and money working with rocketry groups in the Mojave Desert.
+          a(target='_blank' href='https://www.wikiwand.com/en/John_Carmack').btn.btn-primary.float-right Read more..
+    //- .col-2
+      .card
+        .card-block
+          p Stuff..
+  //- .row.mb-4
+    .col-8.offset-2
+      .card
+        .card-block
+          p Other stuff happened down here.
+          a(target='_blank' href='https://www.wikiwand.com/en/John_Carmack').btn.btn-primary Read more..
