@@ -28,12 +28,15 @@ function addText(text): Promise<any> {
 function addCharacter(text: string, element: Element, position: number = 0, speed: number = 40): Promise<any> {
     return new Promise((resolve) => {
         element.innerHTML += text.substr(position, 1);
-        window.setTimeout(resolve, Math.max(10000/(speed+Math.random()*16-8),100));
-    }).then(()=>{
+        window.setTimeout(resolve, Math.max(10000 / (speed + Math.random() * 20 - 10), 100));
+    }).then(() => {
         if (position <= text.length) {
-            addCharacter(text, element, position+1, speed);
+            return addCharacter(text, element, position + 1, speed);
         } else {
             element.classList.add('bounce');
+            return new Promise(resolve => {
+                window.setTimeout(() => { resolve(element) }, 1500);
+            });
         }
     });
 }
@@ -41,9 +44,10 @@ function addCharacter(text: string, element: Element, position: number = 0, spee
 window.addEventListener('load', (ev) => {
     let hello = document.createElement('div');
     hello.id = 'hello';
-    hello.classList.add('them');
+    hello.classList.add('them', 'centered');
     main.appendChild(hello);
-    addCharacter('Hello there. How are you?', hello);
+    addCharacter('Hi.', hello)
+        .then(el => el.classList.remove('centered'));
     // addText('<div class="them" id="hello">Hello</div>')
     //     .then(() => addText('<div class="us" id="hi">Hi</div>'))
     //     .then(() => addText('<div class="them" id="sphinx">Sphinx of black quartz, judge my vow.</div>'))
