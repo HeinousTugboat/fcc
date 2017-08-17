@@ -1,16 +1,31 @@
 $page: white;
 $them: red;
-$us: blue;
+$us: #888;
 svg {
     position: fixed;
     top: 0;
     left: 0;
-    height: 0;
-    width: 0;
+    pointer-events: none;
+    height: 100vh;
+    width: 100vw;
     overflow: visible;
-    z-index: -1;
-    stroke: #09F;
+//     // z-index: -1;
+    // stroke: #09F;
+    // stroke: darken($them, 10%);
+    stroke: #333;
+    stroke-opacity: 0.8;
     stroke-width: 3px;
+    stroke-linecap: square;
+    fill: transparent;
+    > path {
+//         stroke: magenta;
+        animation: 1s forwards dashGrow;
+        transition: all 300ms linear;
+    }
+}
+
+h1 {
+    font-size: 150%;
 }
 
 div {
@@ -21,6 +36,31 @@ div {
     font-weight: 700;
     font-size: 24px;
     font-family: 'Montserrat', sans-serif;
+    transition: all 300ms linear;
+}
+
+
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+.choice {
+    background: $us;
+    border-left: 6px solid darken($us, 10%);
+    // width: 2em;
+    top: 6em;
+    &.active {
+        background: lighten($us, 20%);
+        border-color: $us;
+    }
+}
+
+.weather {
+    background: $us;
+    border-top: 6px solid darken($us, 10%);
+    top: 4em;
+    left: 4em;
+    bottom: 4em;
 }
 
 .them {
@@ -36,6 +76,15 @@ div {
 
 .bounce {
     animation: 100ms 1s 4 alternate wiggleY;
+}
+
+#dumper {
+    border-bottom: 3px dotted darken($us, 10%);
+    display: inline-block;
+    margin-bottom: 2em;
+    + p {
+        font-size: 12px;
+    }
 }
 
 #hello {
@@ -72,11 +121,17 @@ div {
     }
 }
 
+@keyframes dashGrow {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
 .md-whiteframe-1dp {
     box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12);
 }
 
-.md-whiteframe-2dp, #hello {
+.md-whiteframe-2dp, div {
     box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 3px 1px -2px rgba(0, 0, 0, 0.12);
 }
 
@@ -92,7 +147,7 @@ div {
     box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 5px 8px 0px rgba(0, 0, 0, 0.14), 0px 1px 14px 0px rgba(0, 0, 0, 0.12);
 }
 
-.md-whiteframe-6dp, #hello:hover {
+.md-whiteframe-6dp, div:hover {
     box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 6px 10px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12);
 }
 
