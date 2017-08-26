@@ -90,10 +90,10 @@ class Point {
     constructor(x: Point);
     constructor(x: number, y: number);
     constructor(x: number | Point, y?: number) {
-        if (typeof x != 'number') {
+        if (x instanceof Point) {
             this.x = x.x;
             this.y = x.y;
-        } else {
+        } else if (y) {
             this.x = x;
             this.y = y;
         }
@@ -107,6 +107,7 @@ class Point {
         return this;
     }
 }
+
 
 function drawPath(from: Point, to: Point, delay: number = 50): Promise<SVGPathElement> {
     let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -148,7 +149,7 @@ function addWeather(right: Point) {
     </p>
     <br /><br />
     <p id="dumper">kthx</p>`;
-    document.getElementById('dumper').addEventListener('click', (ev)=>{weather.innerHTML+='<p>'+JSON.stringify(weatherResults, null, 2)+'</p>'});
+    (document.getElementById('dumper') as HTMLElement).addEventListener('click', (ev)=>{(weather as HTMLElement).innerHTML+='<p>'+JSON.stringify(weatherResults, null, 2)+'</p>'});
     weather.classList.remove('hidden');
     return weather;
 }
