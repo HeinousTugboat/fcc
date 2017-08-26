@@ -1,6 +1,7 @@
 /***
  * Calculator! Thing! So.. the idea is you can create a new Calculator, then use
  * it to process a series of Operators and Operands.
+ * https://codepen.io/HeinousTugboat/pen/Gvddzv
  *
  * User Stories:
  *   - I can add, subtract, multiply and divide two numbers.
@@ -9,81 +10,47 @@
  *     equal button, and the calculator will tell me the correct output.
  *
  * https://www.freecodecamp.org/challenges/build-a-javascript-calculator
+ *
+ * http://www.alcula.com/images/printingcalculatorbig.jpg
+ * http://www.topappreviews101.com/ipappimg/7866/-accountant-for-ipad-adding-machine-calc-calculator-with-paper-tape-screenshot-1.jpg
+ * http://is5.mzstatic.com/image/thumb/Purple118/v4/df/df/9c/dfdf9c1f-0357-699e-5251-8ec33006fd14/source/175x175bb.jpg
  */
 
 /**
- * An operand in an equation, should always be a number or a result of an
- * Operator.
- */
+    * An operand in an equation, should always be a number or a result of an
+    * Operator.
+    */
 type Operand = number;
 
 /** An Operator. Accepts two Operands and returns a new Operand */
-abstract class Operator {
-    /**
-     * Execute this particular operator's command, returning the calculated
-     * result.
-     */
-    abstract execute(a?: Operand, b?: Operand): Operand;
-
-    /** Symbol used for this operator in strings. */
-    abstract symbol: string;
-
-    abstract precedence: number = 0;
-    abstract associativity = 'Left';
-
+class Operator {
     /** Dictionary of all registered operators. */
-    static dict: { [key: string]: { new (): Operator } } = {};
-    /** Registers a new operator into the dictionary. */
-    static register(op: { symbol: string, new (): Operator }) {
-        this.dict[op.symbol] = op;
+    static dict: { [key: string]: Operator } = {};
+
+    constructor(public symbol: string,
+        public execute: (a?: Operand, b?: Operand) => Operand,
+        public precedence: number = 0,
+        public associativity: 'Left' | 'Right' = 'Left') {
+        Operator.dict[this.symbol] = this;
+    }
+    toString(): string {
+        return this.symbol;
     }
 }
+
+const ops = {
+    Add: (a: number, b: number): number => a + b,
+    Subtract: (a: number, b: number): number => a - b,
+    Multiply: (a: number, b: number): number => a * b,
+    Divide: (a: number, b: number): number => a / b,
+}
+
 /**
  * Represents both Operands and Operators, generally any unit that might be
  * found in an expression.
  */
 type Token = Operand | Operator | '(' | ')';
 
-/** Executes a+b */
-class Add implements Operator {
-    static precedence = 2;
-    static associativity = 'Left';
-    static symbol = '+';
-    public precedence = Add.precedence;
-    public associativity = Add.associativity;
-    public symbol = Add.symbol;
-    execute = (a: Operand, b: Operand) => a + b;
-}
-/** Executes a-b */
-class Subtract implements Operator {
-    static precedence = 2;
-    static associativity = 'Left';
-    static symbol = '-';
-    public precedence = Subtract.precedence;
-    public associativity = Subtract.associativity;
-    public symbol = Subtract.symbol;
-    execute = (a: Operand, b: Operand) => a - b;
-}
-/** Executes a*b */
-class Multiply implements Operator {
-    static precedence = 3;
-    static associativity = 'Left';
-    static symbol = '*';
-    public precedence = Multiply.precedence;
-    public associativity = Multiply.associativity;
-    public symbol = Multiply.symbol;
-    execute = (a: Operand, b: Operand) => a*b;
-}
-/** Executes a/b */
-class Divide implements Operator {
-    static precedence = 3;
-    static associativity = 'Left';
-    static symbol = '/';
-    public precedence = Divide.precedence;
-    public associativity = Divide.associativity;
-    public symbol = Divide.symbol;
-    execute = (a: Operand, b: Operand) => a/b;
-}
 /**
  * Tests to see if given Token is an Operator. Verifies the presence of an
  * *execute* function.
@@ -106,10 +73,11 @@ class Calculator {
     private rpnTokens: Token[];
     private history: string[] = [];
     constructor() {
-        Operator.register(Add);
-        Operator.register(Subtract);
-        Operator.register(Multiply);
-        Operator.register(Divide);
+        new Operator('+', ops.Add, 2);
+        new Operator('-', ops.Subtract, 2);
+        new Operator('*', ops.Multiply, 3);
+        new Operator('/', ops.Divide, 3);
+    }
     }
     /**
      * Converts an array of symbols into an array of Tokens. Checks if the symbol is
@@ -117,9 +85,9 @@ class Calculator {
      * symbol to a number.
      */
     private convert(str: string): Token[] {
-        return str.split('').reduce((acc: Token[], val: string) => {
+        return str.split(/([+\-\/*\(\)])/).reduce((acc: Token[], val: string) => {
             if (Operator.dict[val]) {
-                acc.push(new Operator.dict[val]);
+                acc.push(Operator.dict[val]);
             } else if (val === '(' || val === ')') {
                 acc.push(val);
             } else {
@@ -152,7 +120,7 @@ class Calculator {
     private shuntingYard(tokens: Token[]) {
         let input: Token[] = [...tokens];
         let output: Token[] = [];
-        let operators: (Operator|'('|')')[] = [];
+        let operators: (Operator | '(' | ')')[] = [];
         while (input.length) {
             let token = input.shift();
             if (!token) { continue; }
@@ -188,8 +156,22 @@ class Calculator {
         };
     }
 
-    execute(): number {
-        let input = [...this.rpnTokens];
+    /**
+     * Instructs the calculator to process its entire expression, returning the
+     * result.
+     */
+    execute(): number
+    execute(history?: number): number
+    execute(expr?: string): number
+    execute(p?: string | number): number {
+        let input: Token[];
+        if (typeof p === 'number') {
+            input = this.shuntingYard(this.convert(this.history[p])).output;
+        } else if (typeof p === 'string') {
+            input = this.shuntingYard(this.convert(p)).output;
+        } else {
+            input = [...this.rpnTokens];
+        }
         let stack: Token[] = [];
         while (input.length) {
             let op = input.shift();
@@ -199,40 +181,57 @@ class Calculator {
             } else if (isOperator(op)) {
                 let b = stack.pop();
                 let a = stack.pop();
-                stack.push(op.execute(<Operand>a,<Operand>b));
+                stack.push(op.execute(<Operand>a, <Operand>b));
             }
         }
         if (stack.length > 1) {
-            throw new Error('Items left in the stack! Ohnoes! :>> '+JSON.stringify(stack));
+            throw new Error('Items left in the stack! Ohnoes! :>>\n\n stack:' + JSON.stringify(stack) + '\n input:' + JSON.stringify(input) + '\n expr: ' + this.expression + '\n\n');
         }
         return stack[0] as Operand;
     }
 
+    /**
+     * Sets the calculator's expression, this function adds the new expression
+     * the history, converts the string into tokens, and then processes the
+     * tokens through the Shunting-yard Algorithm. Probably not the best idea,
+     * since it's a setter, but it works well enough for now.
+     */
     set expression(str: string) {
         this.history.push(str);
         this.exprTokens = this.convert(str);
         this.rpnTokens = this.shuntingYard(this.exprTokens).output;
     }
+    /**
+     * Gets the calculator's expression. Essentially just iterates over the
+     * expression token list and converts it to strings. The calculators
+     * expression tokens and RPN tokens should always match, that's why the
+     * setter handles the primary conversion.
+     */
     get expression(): string {
-        return this.parseToString(this.exprTokens);
+        if (this.exprTokens) {
+            return this.parseToString(this.exprTokens);
+        } else {
+            return '';
+        }
+    }
+    toString(): { expression: string, history: string[] } {
+        return { expression: this.exprTokens.map(x => x.toString()).join(''), history: this.history };
     }
 }
 
 
 
-
 /******************************************************************************/
-// Execution Area:
+// Test Execution Area:
 
 let calc = new Calculator;
-calc.expression = '2*(2+2+2)*2';
-console.log(calc.execute());
-calc.expression = '4+(9/3)*(2*4/2)';
-console.log(calc.execute());
-// 1 2 4 / + 3 - 4 5 6 + * +
-calc.expression = '2';
-console.log(calc.execute());
-calc.expression += '+3';
-console.log(calc.execute());
-calc.expression += '*4';
-console.log(calc.execute());
+// console.log('x: '+calc.execute('2*3+4')+ ' = 2*3+4');
+// calc.expression = '2*(2+2+2)*2';
+// calc.expression = '4+(9/3)*(2*4/2)';
+// calc.expression = '2';
+// calc.expression += '+3';
+// calc.expression += '*4';
+
+// console.log('expression:', calc.toString().expression);
+// calc.toString().history.forEach((x,i)=>console.log(i+': '+calc.execute(i)+' = '+x));
+
