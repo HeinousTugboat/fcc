@@ -14,6 +14,12 @@
  * http://www.alcula.com/images/printingcalculatorbig.jpg
  * http://www.topappreviews101.com/ipappimg/7866/-accountant-for-ipad-adding-machine-calc-calculator-with-paper-tape-screenshot-1.jpg
  * http://is5.mzstatic.com/image/thumb/Purple118/v4/df/df/9c/dfdf9c1f-0357-699e-5251-8ec33006fd14/source/175x175bb.jpg
+ *
+ * - TODO: 12*0+0 returns NaN. Fix.
+ * - TODO: Implement the rest of the buttons..
+ * - TODO: Keyup handler..
+ * - TODO: Wire up the display..
+ * - TODO: Wire up the tape roll..
  */
 
 /**
@@ -72,12 +78,50 @@ class Calculator {
     private exprTokens: Token[];
     private rpnTokens: Token[];
     private history: string[] = [];
+    private main: HTMLElement;
+    private display: HTMLElement;
+    private buttons: HTMLElement;
     constructor() {
         new Operator('+', ops.Add, 2);
         new Operator('-', ops.Subtract, 2);
         new Operator('*', ops.Multiply, 3);
         new Operator('/', ops.Divide, 3);
+        this.main = document.getElementsByTagName('main')[0] as HTMLElement;
+        this.display = document.getElementById('display') as HTMLElement;
+        this.buttons = document.getElementById('buttons') as HTMLElement;
+        this.buttons.addEventListener('click', this.buttonHandler.bind(this));
     }
+    private buttonHandler(ev: Event) {
+        let target = ev.target;
+        let data = (ev.target as HTMLElement).dataset;
+        if (data.num) {
+            this.expression += data.num;
+        } else if (data && data.op) {
+            if (Operator.dict[data.op as string] || data.op === '(' || data.op === ')') {
+                this.expression += data.op;
+            } else if (data.op === 'C') {
+                this.expression = '';
+                this.history = [];
+                console.log('History Cleared');
+            } else if (data.op === 'CE') {
+                console.log('Stepping Back: '+this.history.pop());
+                this.expression = this.history.pop() || '';
+                console.log('Stepped back');
+            } else {
+                console.error('Unrecognized Operator...', target, data);
+            }
+        } else {
+            console.error('Unknown Button...', target, data);
+        }
+        if (this.rpnTokens.length >= 3) {
+            try {
+                console.log('Result: ' + this.execute());
+            } catch (err) {
+                console.error('Oops!', err);
+            }
+        }
+        console.log('Expression: ' + this.expression);
+        // console.log('pow:', target, data);
     }
     /**
      * Converts an array of symbols into an array of Tokens. Checks if the symbol is
