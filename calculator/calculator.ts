@@ -15,11 +15,10 @@
  * http://www.topappreviews101.com/ipappimg/7866/-accountant-for-ipad-adding-machine-calc-calculator-with-paper-tape-screenshot-1.jpg
  * http://is5.mzstatic.com/image/thumb/Purple118/v4/df/df/9c/dfdf9c1f-0357-699e-5251-8ec33006fd14/source/175x175bb.jpg
  *
- * - TODO: 12*0+0 returns NaN. Fix.
  * - TODO: Implement the rest of the buttons..
  * - TODO: Keyup handler..
- * - TODO: Wire up the display..
  * - TODO: Wire up the tape roll..
+ * - TODO: Add expression display below total display..
  */
 
 /**
@@ -70,7 +69,7 @@ function isOperator(op: Token): op is Operator {
  * and is a Token is an Operand.
  */
 function isOperand(op: Token): op is Operand {
-    return !isOperator(op) && op !== '(' && op !== ')';
+    return !isOperator(op) && op !== '(' && op !== ')' || typeof op === 'number';
 }
 
 /** The core class. This should be the central class for processing the math. */
@@ -96,31 +95,39 @@ class Calculator {
         let data = (ev.target as HTMLElement).dataset;
         if (data.num) {
             this.expression += data.num;
+            console.log('Expression: ' + this.expression);
+            if (this.rpnTokens.length >= 3) {
+                try {
+                    this.execute();
+                } catch (err) {
+                    console.error('Oops!', err);
+                }
+            }
         } else if (data && data.op) {
             if (Operator.dict[data.op as string] || data.op === '(' || data.op === ')') {
                 this.expression += data.op;
+                if (data.op === ')') {
+                    console.log('Expression: ' + this.expression);
+                    this.execute();
+                }
             } else if (data.op === 'C') {
                 this.expression = '';
                 this.history = [];
+                this.display.innerHTML = '-';
                 console.log('History Cleared');
             } else if (data.op === 'CE') {
-                console.log('Stepping Back: '+this.history.pop());
+                console.log('Stepping Back: ' + this.history.pop());
                 this.expression = this.history.pop() || '';
-                console.log('Stepped back');
+                this.execute()
+            } else if (data.op === 'p') {
+                console.log('expression:', this.toString().expression);
+                this.toString().history.forEach((x, i) => console.log(i + ': ' + this.execute(i) + ' = ' + x));
             } else {
                 console.error('Unrecognized Operator...', target, data);
             }
         } else {
             console.error('Unknown Button...', target, data);
         }
-        if (this.rpnTokens.length >= 3) {
-            try {
-                console.log('Result: ' + this.execute());
-            } catch (err) {
-                console.error('Oops!', err);
-            }
-        }
-        console.log('Expression: ' + this.expression);
         // console.log('pow:', target, data);
     }
     /**
@@ -129,16 +136,22 @@ class Calculator {
      * symbol to a number.
      */
     private convert(str: string): Token[] {
-        return str.split(/([+\-\/*\(\)])/).reduce((acc: Token[], val: string) => {
-            if (Operator.dict[val]) {
-                acc.push(Operator.dict[val]);
-            } else if (val === '(' || val === ')') {
-                acc.push(val);
-            } else {
-                acc.push(+val);
-            }
-            return acc;
-        }, <Token[]>[]);
+        let arr = str.match(/([+\-\/*\(\)]|[0-9]+)/gm);
+        if (!arr || !arr.length) {
+            return [];
+        } else {
+            return arr.reduce((acc: Token[], val: string) => {
+                // return str.split(/([+\-\/*\(\)])/).reduce((acc: Token[], val: string) => {
+                if (Operator.dict[val]) {
+                    acc.push(Operator.dict[val]);
+                } else if (val === '(' || val === ')') {
+                    acc.push(val);
+                } else if (val !== undefined && val !== null && val !== '') {
+                    acc.push(+val);
+                }
+                return acc;
+            }, <Token[]>[]);
+        }
     }
 
     /**
@@ -167,7 +180,12 @@ class Calculator {
         let operators: (Operator | '(' | ')')[] = [];
         while (input.length) {
             let token = input.shift();
-            if (!token) { continue; }
+            // if (!token) {
+            //     token = 0;
+            // }
+            if (token === undefined) {
+                break;
+            }
             if (isOperand(token)) {
                 output.push(token)
             } else if (isOperator(token)) {
@@ -193,7 +211,7 @@ class Calculator {
         }
         while (operators.length) {
             let op = operators.pop();
-            op && output.push(op);
+            (op !== undefined) && output.push(op);
         }
         return {
             output, input, operators
@@ -219,7 +237,7 @@ class Calculator {
         let stack: Token[] = [];
         while (input.length) {
             let op = input.shift();
-            if (!op) break;
+            if (op === undefined) break;
             if (isOperand(op)) {
                 stack.push(op);
             } else if (isOperator(op)) {
@@ -231,6 +249,8 @@ class Calculator {
         if (stack.length > 1) {
             throw new Error('Items left in the stack! Ohnoes! :>>\n\n stack:' + JSON.stringify(stack) + '\n input:' + JSON.stringify(input) + '\n expr: ' + this.expression + '\n\n');
         }
+        this.display.innerHTML = stack[0] as string;
+        console.log('Result: '+stack[0]);
         return stack[0] as Operand;
     }
 
