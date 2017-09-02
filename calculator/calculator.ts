@@ -122,6 +122,10 @@ class Calculator {
             } else if (data.op === 'p') {
                 console.log('expression:', this.toString().expression);
                 this.toString().history.forEach((x, i) => console.log(i + ': ' + this.execute(i) + ' = ' + x));
+            } else if (data.op === '=' ) {
+            } else if (data.op === '%' ) {
+            } else if (data.op === '+-' ) {
+            } else if (data.op === '.' ) {
             } else {
                 console.error('Unrecognized Operator...', target, data);
             }
