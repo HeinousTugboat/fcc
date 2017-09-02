@@ -21,10 +21,16 @@ h1 {
         // height: 1em;
         text-align: center;
         border: 1px solid #555;
+        border: 1px solid transparent;
+        border-right-color: #EEE;
+        border-bottom-color: #EEE;
         display: inline-block;
     }
     &.wide, .tall {
         flex: 1 1 auto;
+    }
+    &.wide {
+        max-width: 10em;
     }
 }
 .col {
@@ -54,7 +60,7 @@ h1 {
 #buttons {
     display: flex;
     flex-direction: row;
-    border: 3px solid #09A;
+    // border: 3px solid #09A;
     margin: 2em;
     padding: 1em;
 }
