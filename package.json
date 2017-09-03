@@ -1,0 +1,40 @@
+{
+  "name": "fcc",
+  "version": "1.0.0",
+  "description": "My FCC projects",
+  "main": "index.js",
+  "dependencies": {
+    "ts-node": "^3.3.0",
+    "typescript": "^2.5.2"
+  },
+  "devDependencies": {
+    "@types/gulp": "^4.0.4",
+    "@types/gulp-pug": "^3.3.0",
+    "@types/gulp-sass": "0.0.30",
+    "@types/webpack": "^3.0.10",
+    "@types/webpack-stream": "^3.2.7",
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-pug": "^3.3.0",
+    "gulp-sass": "^3.1.0",
+    "gulp-typescript": "^3.2.2",
+    "pug-loader": "^2.3.0",
+    "ts-loader": "^2.3.4",
+    "vinyl-named": "^1.1.0",
+    "webpack": "^3.5.5",
+    "webpack-stream": "^4.0.0"
+  },
+  "scripts": {
+    "start": "gulp",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HeinousTugboat/fcc.git"
+  },
+  "author": "HeinousTugboat <admin@heinousindustries.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HeinousTugboat/fcc/issues"
+  },
+  "homepage": "https://github.com/HeinousTugboat/fcc#readme"
+}
