@@ -7,7 +7,7 @@ const named = require('vinyl-named');
 
 const node = '!node_modules/**/*';
 const paths = {
-    pages: ['**/*.pug', node],
+    pages: ['**/*.pug', node, '!templates/**/*'],
     styles: ['**/*.scss', node],
     bundle: ['**/*.ts', '**/*.js', node, '!*.ts', '!**/*.bundle.js'],
     out: '.'

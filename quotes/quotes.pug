@@ -1,18 +1,23 @@
-//- Reference: https://codepen.io/FreeCodeCamp/full/ONjoLe/
-//- Need to use a Quote API.. where to even find one?
-//- Need to use Twitter API..
-main
-  #quotes
-    //- blockquote sekrit txt
-    blockquote To bake an apple pie, you must first invent the Internet.
-      cite Some Dude on the Internet
-    #buttons
-      button#newQuote Get New Quote
-      a#share.twitter-share-button(target='_blank' href="https://twitter.com/intent/tweet?text=To%20bake%20an%20apple%20pie%2C%20you%20must%20first%20invent%20the%20Internet.%20%E2%80%95Some%20Dude%20on%20the%20Internet") Tweet #[i.fa.fa-twitter ]
-  #loadIndicator
-    div
-    div
-    div
-    div
-    div
-    div
+extends ../templates/main
+append vars
+    - title = 'Quote Generator'
+    - name = 'quotes'
+block body
+  //- Reference: https://codepen.io/FreeCodeCamp/full/ONjoLe/
+  //- Need to use a Quote API.. where to even find one?
+  //- Need to use Twitter API..
+  main
+    #quotes
+      //- blockquote sekrit txt
+      blockquote To bake an apple pie, you must first invent the Internet.
+        cite Some Dude on the Internet
+      #buttons
+        button#newQuote Get New Quote
+        a#share.twitter-share-button(target='_blank' href="https://twitter.com/intent/tweet?text=To%20bake%20an%20apple%20pie%2C%20you%20must%20first%20invent%20the%20Internet.%20%E2%80%95Some%20Dude%20on%20the%20Internet") Tweet #[i.fa.fa-twitter ]
+    #loadIndicator
+      div
+      div
+      div
+      div
+      div
+      div

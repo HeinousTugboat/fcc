@@ -1,0 +1,18 @@
+block vars
+    - let title = 'Tabula Rasa: The Unnamed'
+    - let name = 'unnamed'
+    - let pubdate = new Date(Date.now());
+
+doctype html
+html.no-js(lang='en')
+    head
+        meta(charset='utf-8')
+        //- meta(http-equiv='x-ua-compatible' content='ie=edge')
+        meta(name='viewport' content='width=device-width, initial-scale=1.0')
+        title= title
+        block head
+            link(rel='stylesheet' href=name+'.css')
+    body
+        block body
+        block script
+            script(src=name+'.bundle.js')

@@ -1,110 +1,116 @@
-// Info on Bulma.. http://bulma.io/documentation/layout/container/
-// DevIcons.. http://konpa.github.io/devicon/
-// Consider tiles instead of columns? http://bulma.io/documentation/grid/tiles/
-// I think I'd prefer the techs being icons either down the outside edge, or stacked as an overlay in the corner.. Maybe corner ribbons..
+extends ../templates/main
+append vars
+    - title = 'Portfolio'
+    - name = 'portfolio'
+block script
+block body
+  // Info on Bulma.. http://bulma.io/documentation/layout/container/
+  // DevIcons.. http://konpa.github.io/devicon/
+  // Consider tiles instead of columns? http://bulma.io/documentation/grid/tiles/
+  // I think I'd prefer the techs being icons either down the outside edge, or stacked as an overlay in the corner.. Maybe corner ribbons..
 
-//- my-top-bar(
-  [(ngModel)]="myModel",
-  [propA]="myPropA",
-  (actionA)="handle($event)"
-  )
+  //- my-top-bar(
+    [(ngModel)]="myModel",
+    [propA]="myPropA",
+    (actionA)="handle($event)"
+    )
 
-header.hero.is-bold.is-light
-  .hero-body: .container
-    h1.title H. Tugboat
-    p.subtitle A selection of my latest projects
-    //- i.fa.fa-free-code-camp
-    //- i.devicon-sass-original
-    //- i.devicon-bootstrap-plain
-    //- i.devicon-bitbucket-plain
-    //- i.devicon-github-plain
-    //- i.devicon-express-plain
-  .hero-foot: nav.tabs.is-boxed.is-centered: ul
-    //- li.is-active: a(href='#') Boop
-    // TODO: Make it actually scroll into view..
-    li: a(href='#projects') Projects
-    li: a(href='#about') About Me
-section#projects.section: .container
-  .columns
-    .column.is-one-third: .content
-      h2 Random Quote Generator
-      a(href='https://www.freecodecamp.org/challenges/build-a-random-quote-machine') Challenge Page
-      p The hardest part for this, for me, was just finding a free quote API that was CORS-friendly. Spoiler: I couldn't. I wound up using a CORS proxy that, well, I'm not fond of but I definitely learned a lot about HTTP security while working on this. Also played around with CSS gradients, animations and masks to make the shifting, the wipe effect, and the loading indicator. Part of me wants to add a minimum delay between the click and actual load, but it seems to run slow enough because of the heroku passthrough as is. Oh, and I didn't actually use any CSS frameworks for this. Just FontAwesome for the twitter icon. Totally written by hand. Go me.
-    .column.is-two-thirds: .card
-      .card-image: figure.image.is-4by3: a(target='_blank' href='https://codepen.io/HeinousTugboat/full/JyEdRy')
-        img(src='http://heinous.industries/fcc/quotes.png')
-  .columns
-    .column.is-one-third: .content
-      h2 A Tribute to John Carmack
-      a(href='https://www.freecodecamp.org/challenges/build-a-tribute-page') Challenge Page
-      p I chose to do my tribute page on John Carmack, as he's an extremely influential part of the game development world and a man I truly look up to for both his accomplishments and his raw skill. I only wish I could handle game engines the way he can.
-    .column.is-two-thirds: .card
-      header.card-header
-        //- p.card-header-icon: i.fa.fa-angle-down
-      .card-image: figure.image.is-4by3: a(target='_blank' href='https://codepen.io/HeinousTugboat/pen/NvGprr')
-        //- img(src='http://via.placeholder.com/800x600')
-        img(src='http://heinous.industries/fcc/tribute.png')
-        .floating
-          .pug
-          i.devicon-sass-original
-          i.devicon-bootstrap-plain
-      //- footer.card-footer
-        a.card-footer-item
-          //- p Bootstrap
-          i.devicon-bootstrap-plain
-        a.card-footer-item
-          p Pug.JS
-        a.card-footer-item
-          //- p Sass
-          i.devicon-sass-original
-  //- .columns
-    .column.is-one-third: .content
-      //- p foop
-    .column.is-two-thirds: .card
-      header.card-header
-        p.card-header-title Things! Stuff!
-        p.card-header-icon: i.fa.fa-angle-down
-      .card-image: figure.image.is-4by3: a.href('#')
-        img(src='http://via.placeholder.com/800x600')
-        .floating
-          p Boop
-          p Beep
-          p Baaap
-      //- footer.card-footer
-        a.card-footer-item
-          p boop
-        a.card-footer-item
-          p foop
+  header.hero.is-bold.is-light
+    .hero-body: .container
+      h1.title H. Tugboat
+      p.subtitle A selection of my latest projects
+      //- i.fa.fa-free-code-camp
+      //- i.devicon-sass-original
+      //- i.devicon-bootstrap-plain
+      //- i.devicon-bitbucket-plain
+      //- i.devicon-github-plain
+      //- i.devicon-express-plain
+    .hero-foot: nav.tabs.is-boxed.is-centered: ul
+      //- li.is-active: a(href='#') Boop
+      // TODO: Make it actually scroll into view..
+      li: a(href='#projects') Projects
+      li: a(href='#about') About Me
+  section#projects.section: .container
+    .columns
+      .column.is-one-third: .content
+        h2 Random Quote Generator
+        a(href='https://www.freecodecamp.org/challenges/build-a-random-quote-machine') Challenge Page
+        p The hardest part for this, for me, was just finding a free quote API that was CORS-friendly. Spoiler: I couldn't. I wound up using a CORS proxy that, well, I'm not fond of but I definitely learned a lot about HTTP security while working on this. Also played around with CSS gradients, animations and masks to make the shifting, the wipe effect, and the loading indicator. Part of me wants to add a minimum delay between the click and actual load, but it seems to run slow enough because of the heroku passthrough as is. Oh, and I didn't actually use any CSS frameworks for this. Just FontAwesome for the twitter icon. Totally written by hand. Go me.
+      .column.is-two-thirds: .card
+        .card-image: figure.image.is-4by3: a(target='_blank' href='https://codepen.io/HeinousTugboat/full/JyEdRy')
+          img(src='http://heinous.industries/fcc/quotes.png')
+    .columns
+      .column.is-one-third: .content
+        h2 A Tribute to John Carmack
+        a(href='https://www.freecodecamp.org/challenges/build-a-tribute-page') Challenge Page
+        p I chose to do my tribute page on John Carmack, as he's an extremely influential part of the game development world and a man I truly look up to for both his accomplishments and his raw skill. I only wish I could handle game engines the way he can.
+      .column.is-two-thirds: .card
+        header.card-header
+          //- p.card-header-icon: i.fa.fa-angle-down
+        .card-image: figure.image.is-4by3: a(target='_blank' href='https://codepen.io/HeinousTugboat/pen/NvGprr')
+          //- img(src='http://via.placeholder.com/800x600')
+          img(src='http://heinous.industries/fcc/tribute.png')
+          .floating
+            .pug
+            i.devicon-sass-original
+            i.devicon-bootstrap-plain
+        //- footer.card-footer
+          a.card-footer-item
+            //- p Bootstrap
+            i.devicon-bootstrap-plain
+          a.card-footer-item
+            p Pug.JS
+          a.card-footer-item
+            //- p Sass
+            i.devicon-sass-original
+    //- .columns
+      .column.is-one-third: .content
+        //- p foop
+      .column.is-two-thirds: .card
+        header.card-header
+          p.card-header-title Things! Stuff!
+          p.card-header-icon: i.fa.fa-angle-down
+        .card-image: figure.image.is-4by3: a.href('#')
+          img(src='http://via.placeholder.com/800x600')
+          .floating
+            p Boop
+            p Beep
+            p Baaap
+        //- footer.card-footer
+          a.card-footer-item
+            p boop
+          a.card-footer-item
+            p foop
 
-section#about.section:  .container: .columns
-  .column.content.is-one-quarter
-    //- p Test
-    //- p: a.button.is-dark(href='https://codepen.io/freeCodeCamp/full/YqLyXB') Example Pen
-    //- p: a.button.is-primary(href='http://bulma.io/documentation/layout/container/') Bulma Framework
-    //- p: a.button.is-info(href='https://github.com/Wikiki/bulma-timeline') Bulma Timeline
-  .column.is-half
-    .content.text-centered
-      h1 Hi! I'm HeinousTugboat!
-      p I've been working with computers and programming for a good 20 years, but only this year did I start taking it really seriously. I've been focusing on completing the FCC certificates while also teaching myself a variety of technologies such as Node, TypeScript, Angular, PostegreSQL by working on additional projects that I'll include here in a separate section once I've got them working.
-      p I've got a broad set of skills and absolutely love working with other people. If you have any questions or just wanna chat, hit me up at any of my social media accounts, or anywhere you see HeinousTugboat. Far as I can tell, I'm still the only one!
-  .column.is-one-quarter#social-icons
-    a(href='https://www.freecodecamp.org/heinoustugboat')
-      i.fa.fa-3x.fa-free-code-camp
-    a(href='https://www.reddit.com/user/HeinousTugboat/')
-      i.fa.fa-3x.fa-reddit-alien
-    a(href='https://github.com/HeinousTugboat')
-      i.fa.fa-3x.fa-github
-    //- a(href='https://bitbucket.org/HeinousTugboat/')
-      i.fa.fa-3x.fa-bitbucket
-    a(href='https://stackoverflow.com/users/8054031/heinoustugboat')
-      i.fa.fa-3x.fa-stack-overflow
-    //- a(href='https://stackexchange.com/users/10960593/heinoustugboat')
-      i.fa.fa-3x.fa-stack-exchange
-    a(href='https://twitter.com/HeinousTugboat')
-      i.fa.fa-3x.fa-twitter
-    a(href='https://www.facebook.com/HeinousTugboat')
-      i.fa.fa-3x.fa-facebook-f
-    //- a(href='http://steamcommunity.com/id/HeinousTugboat/')
-      i.fa.fa-3x.fa-steam
-footer.footer.is-light: .container
-    //- p.content.has-text-centered By H.Tugboat..
+  section#about.section:  .container: .columns
+    .column.content.is-one-quarter
+      //- p Test
+      //- p: a.button.is-dark(href='https://codepen.io/freeCodeCamp/full/YqLyXB') Example Pen
+      //- p: a.button.is-primary(href='http://bulma.io/documentation/layout/container/') Bulma Framework
+      //- p: a.button.is-info(href='https://github.com/Wikiki/bulma-timeline') Bulma Timeline
+    .column.is-half
+      .content.text-centered
+        h1 Hi! I'm HeinousTugboat!
+        p I've been working with computers and programming for a good 20 years, but only this year did I start taking it really seriously. I've been focusing on completing the FCC certificates while also teaching myself a variety of technologies such as Node, TypeScript, Angular, PostegreSQL by working on additional projects that I'll include here in a separate section once I've got them working.
+        p I've got a broad set of skills and absolutely love working with other people. If you have any questions or just wanna chat, hit me up at any of my social media accounts, or anywhere you see HeinousTugboat. Far as I can tell, I'm still the only one!
+    .column.is-one-quarter#social-icons
+      a(href='https://www.freecodecamp.org/heinoustugboat')
+        i.fa.fa-3x.fa-free-code-camp
+      a(href='https://www.reddit.com/user/HeinousTugboat/')
+        i.fa.fa-3x.fa-reddit-alien
+      a(href='https://github.com/HeinousTugboat')
+        i.fa.fa-3x.fa-github
+      //- a(href='https://bitbucket.org/HeinousTugboat/')
+        i.fa.fa-3x.fa-bitbucket
+      a(href='https://stackoverflow.com/users/8054031/heinoustugboat')
+        i.fa.fa-3x.fa-stack-overflow
+      //- a(href='https://stackexchange.com/users/10960593/heinoustugboat')
+        i.fa.fa-3x.fa-stack-exchange
+      a(href='https://twitter.com/HeinousTugboat')
+        i.fa.fa-3x.fa-twitter
+      a(href='https://www.facebook.com/HeinousTugboat')
+        i.fa.fa-3x.fa-facebook-f
+      //- a(href='http://steamcommunity.com/id/HeinousTugboat/')
+        i.fa.fa-3x.fa-steam
+  footer.footer.is-light: .container
+      //- p.content.has-text-centered By H.Tugboat..
