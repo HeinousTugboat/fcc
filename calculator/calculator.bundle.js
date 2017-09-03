@@ -1,4 +1,81 @@
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(1);
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
 "use strict";
+
 class Operator {
     constructor(symbol, execute, precedence = 0, associativity = 'Left') {
         this.symbol = symbol;
@@ -44,7 +121,7 @@ class Calculator {
             console.log('Expression: ' + this.expression);
             if (this.rpnTokens.length >= 3) {
                 try {
-                    console.log('Result: ' + this.execute());
+                    this.execute();
                 }
                 catch (err) {
                     console.error('Oops!', err);
@@ -56,21 +133,31 @@ class Calculator {
                 this.expression += data.op;
                 if (data.op === ')') {
                     console.log('Expression: ' + this.expression);
-                    console.log('Result: ' + this.execute());
+                    this.execute();
                 }
             }
             else if (data.op === 'C') {
                 this.expression = '';
                 this.history = [];
+                this.display.innerHTML = '-';
                 console.log('History Cleared');
             }
             else if (data.op === 'CE') {
                 console.log('Stepping Back: ' + this.history.pop());
                 this.expression = this.history.pop() || '';
+                this.execute();
             }
             else if (data.op === 'p') {
                 console.log('expression:', this.toString().expression);
                 this.toString().history.forEach((x, i) => console.log(i + ': ' + this.execute(i) + ' = ' + x));
+            }
+            else if (data.op === '=') {
+            }
+            else if (data.op === '%') {
+            }
+            else if (data.op === '+-') {
+            }
+            else if (data.op === '.') {
             }
             else {
                 console.error('Unrecognized Operator...', target, data);
@@ -183,6 +270,7 @@ class Calculator {
             throw new Error('Items left in the stack! Ohnoes! :>>\n\n stack:' + JSON.stringify(stack) + '\n input:' + JSON.stringify(input) + '\n expr: ' + this.expression + '\n\n');
         }
         this.display.innerHTML = stack[0];
+        console.log('Result: ' + stack[0]);
         return stack[0];
     }
     set expression(str) {
@@ -203,3 +291,7 @@ class Calculator {
     }
 }
 let calc = new Calculator;
+
+
+/***/ })
+/******/ ]);

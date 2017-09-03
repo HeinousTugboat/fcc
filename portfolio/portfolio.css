@@ -1,0 +1,66 @@
+header.hero {
+  position: sticky;
+  top: -9rem;
+  z-index: 10; }
+
+.section .columns:nth-child(even) {
+  flex-direction: row-reverse; }
+
+i.fa {
+  color: #333;
+  margin: 4px; }
+
+.card-image {
+  background: black; }
+
+#projects {
+  padding-top: 5em; }
+  #projects .card:hover .card-image img {
+    opacity: 0.65; }
+  #projects .card:hover .floating {
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.5); }
+    #projects .card:hover .floating > * {
+      color: white; }
+
+.card, .card img {
+  transition: all 500ms ease-in-out; }
+  .card > *, .card img > * {
+    transition: inherit; }
+
+.floating {
+  position: absolute;
+  display: flex;
+  flex-direction: column-reverse;
+  bottom: 0.5em;
+  right: 0.5em;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  transition: all 350ms ease-in-out; }
+  .floating > * {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+    color: black;
+    overflow: hidden;
+    margin: 3px;
+    transition: all 500ms ease-in-out; }
+  .floating .pug {
+    background: url("https://cdn.rawgit.com/pugjs/pug-logo/eec436cee8fd9d1726d7839cbe99d1f694692c0c/SVG/pug-final-logo-_-grey-64.svg"); }
+
+.reverse .floating {
+  bottom: 0.5em;
+  left: 0.5em; }
+
+img.pug {
+  width: 48px;
+  height: 48px; }
+
+#social-icons {
+  display: flex;
+  flex-direction: column;
+  align-items: center; }
+  #social-icons i {
+    transition: all 150ms ease-in-out; }
+    #social-icons i:hover {
+      color: #007fff; }
