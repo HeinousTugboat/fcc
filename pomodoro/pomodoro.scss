@@ -1,0 +1,33 @@
+svg {
+    overflow: visible;
+    fill-opacity: 0;
+    stroke-width: 2;
+    stroke: #F0F;
+}
+html {
+    height: 100%;
+}
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    overflow: hidden;
+}
+header {
+    flex: 0 0 auto;
+}
+main {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+main > div {
+    flex: 1 1 auto;
+}
+#buttons {
+    flex: 0 0 auto;
+}
+div, header {
+    margin: auto;
+    text-align: center;
+}
