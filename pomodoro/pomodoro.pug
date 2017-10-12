@@ -1,10 +1,24 @@
 header: h1 Pomodoro!
+section#controls
+    div#break
+        h2 Break Length
+        div
+            button.decrement(onClick="pomo.addBreakTime(-1*MIN)") -
+            span.value ##
+            button.increment(onClick="pomo.addBreakTime(1*MIN)") +
+    div#session
+        h2 Session Length
+        div
+            button.decrement(onClick="pomo.addTime(-1*MIN)") -
+            span.value ##
+            button.increment(onClick="pomo.addTime(1*MIN)") +
 main
-    div
+    div(onClick="pomo.pause()")
         svg#timer(version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" height="1" width="1")
     div#buttons
-        button Play
-        button Stop
-        button Pause
-        button Extend
-        button Reset
+        button(onClick="pomo.start()") Play
+        button(onClick="pomo.stop()") Stop
+        button(onClick="pomo.pause()") Pause
+        button(onClick="pomo.setTime(30*1000);pomo.start()") Reset
+section#label-display Work!
+section#time-display 00:00

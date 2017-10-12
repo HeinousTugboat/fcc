@@ -1,20 +1,35 @@
 svg {
     overflow: visible;
-    fill-opacity: 0;
+    // fill-opacity: 0;
     stroke-width: 2;
-    stroke: #F0F;
+    stroke: #C0C;
+    fill: #E0E;
+}
+path {
+    transition: stroke 250ms ease-in-out, fill-opacity 250ms 125ms ease-in-out;
+
+    &:hover {
+        stroke: #FFF;
+        fill-opacity: 0.7;
+    }
 }
 html {
     height: 100%;
 }
 body {
+    font-family: 'Montserrat', sans-serif;
     display: flex;
     flex-direction: column;
     min-height: 100%;
     overflow: hidden;
+    color: #F0F0F0;
+    text-shadow: 0px 0px 0.2em #999;
+    background: radial-gradient(farthest-corner at 20vw 20vh,#333 0%,#000 100%);
 }
 header {
     flex: 0 0 auto;
+    font-family: 'Lobster', cursive;
+    font-size: 48px;
 }
 main {
     flex: 1 1 auto;
@@ -23,11 +38,59 @@ main {
 }
 main > div {
     flex: 1 1 auto;
+    width: 90%;
+
 }
 #buttons {
     flex: 0 0 auto;
 }
 div, header {
     margin: auto;
+    margin-bottom: 4px;
     text-align: center;
+}
+button {
+    background: transparent;
+    border: 2px solid transparent;
+    border-bottom-color: #C0C;
+    margin: 2px;
+    padding: 2px 5px;
+    color: inherit;
+    transition: box-shadow 500ms ease-in-out;
+    font-family: 'Montserrat', sans-serif;
+    min-width: 30px;
+    &:hover {
+        box-shadow: inset 0px -10px 10px -5px #707;
+    }
+}
+
+#controls {
+    display: flex;
+    > div {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.value {
+    display: inline-block;
+    min-width: 30px;
+    text-align: center;
+}
+#label-display,
+#time-display {
+    position: fixed;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 36px;
+    text-shadow: 0px 0px 2px #111, 0px 0px 0.2em #777;
+}
+
+#label-display {
+    top: 33%;
+}
+#time-display {
+    bottom: 33%;
 }
