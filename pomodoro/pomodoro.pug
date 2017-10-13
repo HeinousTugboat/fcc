@@ -9,9 +9,9 @@ section#controls
     div#session
         h2 Session Length
         div
-            button.decrement(onClick="pomo.addTime(-1*MIN)") -
+            button.decrement(onClick="pomo.addWorkTime(-1*MIN)") -
             span.value ##
-            button.increment(onClick="pomo.addTime(1*MIN)") +
+            button.increment(onClick="pomo.addWorkTime(1*MIN)") +
 main
     div(onClick="pomo.pause()")
         svg#timer(version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" height="1" width="1")
@@ -19,6 +19,7 @@ main
         button(onClick="pomo.start()") Play
         button(onClick="pomo.stop()") Stop
         button(onClick="pomo.pause()") Pause
-        button(onClick="pomo.setTime(30*1000);pomo.start()") Reset
-section#label-display Work!
-section#time-display 00:00
+        button(onClick="pomo.reset()") Reset
+        //- button(onClick="pomo.setTime(30*1000);pomo.start()") Reset
+section#label-display(onClick="pomo.pause()") Start!
+section#time-display(onClick="pomo.pause()") 00:00

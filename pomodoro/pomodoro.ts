@@ -6,22 +6,31 @@ let context: AudioContext;
 let source: AudioBufferSourceNode;
 let sonicPanic: AudioBuffer;
 
+enum pType { WORK, BREAK };
+
+declare const webkitAudioContext: AudioContext;
 window.addEventListener('load', initAudio, false);
 function initAudio() {
-    try {
-        context = new AudioContext();
-        // source = context.createBufferSource();
-        fetch('https://heinous.industries/sonic.mp3')
-            .then(res => res.arrayBuffer())
-            .then(res => context.decodeAudioData(res))
-            .then(buff => sonicPanic = buff);
-        // .then(buff => source.buffer = buff)
-        // .then(() => source.connect(context.destination))
-        // .then(() => source.start(0));
-    }
-    catch (e) {
-        alert('Web Audio is broked! :-(');
-    }
+    return Promise.resolve(context = new (AudioContext || webkitAudioContext)())
+        .then(() => fetch('https://heinous.industries/sonic.mp3'))
+        .then(res => res.arrayBuffer())
+        .then(res => context.decodeAudioData(res))
+        .then(buff => sonicPanic = buff)
+        .catch(e => alert('Web Audio is broked! :-( ' + e));
+    // try {
+    //     context = new (AudioContext || webkitAudioContext)();
+    //     // source = context.createBufferSource();
+    //     fetch('https://heinous.industries/sonic.mp3')
+    //         .then(res => res.arrayBuffer())
+    //         .then(res => context.decodeAudioData(res))
+    //         .then(buff => sonicPanic = buff);
+    //     // .then(buff => source.buffer = buff)
+    //     // .then(() => source.connect(context.destination))
+    //     // .then(() => source.start(0));
+    // }
+    // catch (e) {
+    //     alert('Web Audio is broked! :-( ' + e);
+    // }
 }
 
 class Pomodoro {
@@ -34,14 +43,19 @@ class Pomodoro {
     private breakEl: HTMLElement;
     private sessionEl: HTMLElement;
     private displayEl: HTMLElement;
+    private labelEl: HTMLElement;
     private arc: SVGPathElement;
-    // private duration = 14000;
-    private duration: number = 1 * MIN;//25*MIN;
+    // private duration: number = 5 * SEC;//25*MIN;
+    private workDur: number = 25 * MIN;
     private breakDur: number = 5 * MIN;
-    private T: number;
+    private duration: number = this.workDur;
     private isRunning: boolean = false;
-    private dT: number;
     private isPlaying: boolean = false;
+    /** Time current period started */
+    private T: number;
+    /** Time elapsed since `this.T` */
+    private dT: number;
+    private type: pType = pType.WORK;
 
     constructor(private positive = true) {
         const { height, width } = document.getElementsByTagName('main')[0].getBoundingClientRect();
@@ -62,8 +76,10 @@ class Pomodoro {
         this.sessionEl.innerHTML = '' + this.duration / MIN;
         this.displayEl = document.getElementById('time-display') as HTMLElement;
         this.displayEl.innerHTML = '' + (this.duration - this.T);
-        this.start();
+        this.labelEl = document.getElementById('label-display') as HTMLElement;
+        // this.start();
         // this.pause();
+        this.update();
         this.element.appendChild(this.arc);
         // console.log(this.element);
     }
@@ -73,48 +89,95 @@ class Pomodoro {
         source.buffer = sonicPanic;
         source.connect(context.destination);
         source.start(0);
-        source.addEventListener('onended', () => this.isPlaying = false);
+        source.addEventListener('ended', () => this.isPlaying = false);
     }
     start() {
         this.isRunning = true;
-        this.f = 0;
-        this.T = Date.now();
-        this.dT = 0;
+        if (!this.isRunning || this.T+this.duration < Date.now() || this.dT >= this.duration) {
+            this.f = 0;
+            this.T = Date.now();
+            this.dT = 0;
+        }
         this.update();
     }
     stop() {
+        if (this.isRunning) {
+            this.labelEl.innerHTML += '<br /><small>stopped</small>';
+        }
         this.isRunning = false;
-        this.f = 1;
-        this.T = 0;
+        this.isPlaying = false;
     }
     pause() {
         if (this.isRunning) {
             this.isRunning = false;
+            this.labelEl.innerHTML += '<br /><small>paused</small>';
         } else {
             this.isRunning = true;
             this.T = Date.now() - this.dT;
         }
     }
+    reset() {
+        this.stop();
+        this.duration = this.workDur;
+        this.type = pType.WORK;
+        this.f = 0;
+        this.T = Date.now();
+        this.dT = 0;
+    }
+    end() {
+        this.T = Date.now();
+        this.f = 0;
+        this.dT = 0;
+        switch(this.type) {
+            case pType.WORK:
+            this.labelEl.innerHTML = 'Break!';
+            this.type = pType.BREAK;
+            this.duration = this.breakDur;
+            break;
+            case pType.BREAK:
+            this.labelEl.innerHTML = 'Work!';
+                this.type = pType.WORK;
+                this.duration = this.workDur;
+                this.isPlaying = false;
+                break;
+        }
+    }
     setTime(num: number) {
         this.duration = num;
     }
-    addTime(num: number) {
-        this.duration += num;
-        if (this.duration < 1) {
-            this.duration = 1;
+    addWorkTime(num: number) {
+        this.workDur += num;
+        if (this.workDur < 1) {
+            this.workDur = 1;
         }
-        this.f = this.dT / this.duration;
+    }
+    addBreakTime(num: number) {
+        this.breakDur += num;
+        if(this.breakDur < 1) {
+            this.breakDur = 1;
+        }
     }
     update() {
         if (this.isRunning) {
             this.dT = Date.now() - this.T;
-            this.f = this.dT / this.duration;
             let remaining = this.duration - this.dT;
+            switch (this.type) {
+                case pType.WORK:
+                    this.labelEl.innerHTML = 'Work!'; // FIXME: This is really ugly and horrible and wrong..
+                    this.f = this.dT / this.duration;
+                    break;
+                case pType.BREAK:
+                    this.labelEl.innerHTML = 'Break!'; // FIXME: This is really ugly and horrible and wrong..
+                    this.f = remaining / this.duration;
+                    break;
+            }
+
             if (remaining <= 1) {
-                this.isRunning = false;
-                this.f = 1.0;
-                this.dT = this.duration;
-            } else if (remaining <= 12500 && !this.isPlaying) {
+                this.end();
+                // this.isRunning = false;
+                // this.f = 1.0;
+                // this.dT = this.duration;
+            } else if (this.type === pType.WORK && remaining <= 12500 && !this.isPlaying) {
                 this.playAlert();
             }
         }
@@ -123,6 +186,14 @@ class Pomodoro {
         requestAnimationFrame(this.update.bind(this));
     }
     draw() {
+        // switch (this.type) {
+            // case pType.WORK:
+                // this.arc.setAttribute('d', this.positivePath);
+                // break;
+            // case pType.BREAK:
+                // this.arc.setAttribute('d', this.negativePath);
+                // break;
+        // }
         if (this.positive) {
             this.arc.setAttribute('d', this.positivePath);
         } else {
@@ -130,7 +201,7 @@ class Pomodoro {
         }
         // Should really put these behind setters instead of here.. but.. eh.
         this.breakEl.innerHTML = (this.breakDur / MIN).toFixed(0);
-        this.sessionEl.innerHTML = (this.duration / MIN).toFixed(0);
+        this.sessionEl.innerHTML = (this.workDur / MIN).toFixed(0);
         const remaining = this.duration - this.dT;
         const min = Math.abs(Math.floor(remaining / MIN));
         const sec = Math.abs(Math.floor((remaining - min * MIN) / SEC));
@@ -159,5 +230,5 @@ class Pomodoro {
 }
 
 const pomo = new Pomodoro;
-console.log(pomo.positivePath);
-pomo.update();
+// console.log(pomo.positivePath);
+// pomo.update();
