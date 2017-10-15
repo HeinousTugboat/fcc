@@ -6,16 +6,24 @@ body {
     display: flex;
     flex-direction: column;
     text-align: center;
-    color: #222;
+    color: #EEE;
     align-itemS: center;
+    background: #222;
+    font-family: 'Saira Semi Condensed', sans-serif;
+    font-weight: 500;
 }
+
 h1 {
-    font-size: 36px;
+    font-size: 48px;
     padding: 16px 0 4px;
+    font-weight: 700;
 }
+
 ul {
+    color: #333;
     display: flex;
 }
+
 #toggles {
     margin: 0;
     padding: 0;
@@ -23,28 +31,150 @@ ul {
     margin-bottom: 4px;
     padding-right: 16px;
 }
-#toggles > li {
-    // margin: 0px;
+
+#toggles>li>button {
+    background: #777;
+    color: #222; // margin: 0px;
     margin-left: 4px;
     padding: 4px 8px;
-    border: 1px solid #333;
-    // border-bottom: 0px;
-}
-#items {
-    flex-direction: column;
-    // border: 1px solid #333;
-    > li {
-        display: flex;
-        justify-content: space-around;
-        border: 1px solid #333;
-        margin: 4px;
-        padding: 0;
-        > div {
-            padding: 8px 16px;
+    border: 1px solid #000;
+    font-weight: 600; // border-bottom: 0px;
+    transition: all 500ms ease-in-out, transform 200ms ease-in-out;
+    &:hover {
+        transform: translateY(4px);
+    }
+    &.online {
+        border-color: #357;
+        color: #337;
+        background: #F0F9FF;
+        &:hover {
+            border-color: #F0F9FF;
+            color: #F0F9FF;
+            background: #337;
         }
-        &.online {
-            border: 3px solid #F0F;
+    }
+    &.offline {
+        color: #733;
+        border-color: #300;
+        background: #FFF0F0;
+        &:hover {
+            border-color: #FFF0F0;
+            color: #FFF0F0;
+            background: #300;
+        }
+    }
+    &.all {
+        color: #333;
+        border-color: #000;
+        background: #DDD;
+        &:hover {
+            border-color: #DDD;
+            background: #333;
+            color: #DDD;
         }
     }
 }
 
+#items {
+    flex-direction: column;
+    min-width: 550px; // border: 1px solid #333;
+    transition: all 150ms ease-in-out;
+    >li {
+        transition: all 150ms ease-in-out;
+        border: 1px solid #000;
+        margin: 4px;
+        padding: 0;
+        background: white;
+        >a {
+            display: flex; // > * {
+            //     border: 1px solid #FF0;
+            // }
+            >div {
+                transition: inherit;
+                padding: 8px 16px;
+                flex: 1 0 auto;
+                text-align: left;
+            }
+            >.streaming {
+                flex: 0 0 100px;
+            }
+            >.status {
+                flex: 1 1 auto;
+                text-align: center;
+            }
+        }
+        &.online {
+            .game {
+                color: #555;
+            }
+            &:hover {
+                border-color: #357;
+                color: #337;
+                background: #F0F9FF;
+                transform: translateX(-16px);
+                .logo {
+                    filter: sepia(100%) hue-rotate(160deg);
+                }
+                .game {
+                    color: #337;
+                }
+            }
+        }
+        &.offline {
+            color: #AAA;
+            border-color: #000;
+            background: #DDD;
+            .logo {
+                filter: grayscale(100%) opacity(25%);
+            }
+            &:hover {
+                color: #733;
+                border-color: #300;
+                background: #FFF0F0;
+                transform: translateX(-16px);
+                .logo {
+                    filter: sepia(100%) hue-rotate(-60deg) saturate(10%) opacity(50%);
+                }
+            }
+        }
+        &.hidden {
+            display: none;
+            visibility: hidden;
+        }
+    }
+}
+
+.logo {
+    min-width: 50px;
+    min-height: 50px;
+}
+
+.name {
+    font-weight: 500;
+    font-size: 18px;
+}
+
+.game {
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.status {
+    font-weight: 400;
+}
+
+.streaming {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+a {
+    margin: 0;
+    border: 0px solid transparent;
+    padding: 0;
+    &:link, &:visited, &:hover, &:focus, &:active {
+        color: unset;
+        text-decoration: unset;
+    }
+}

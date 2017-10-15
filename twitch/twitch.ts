@@ -16,12 +16,14 @@ class Channel {
     static container: HTMLUListElement | null;
     static template: HTMLTemplateElement | null;
     private logoUrl: string = 'http://placehold.it/50x50';
+    private channelUrl: string;
     private displayName: string;
     private status: string;
     private game: string;
     private online: boolean = false;
     private stream: any;
     private element: HTMLLIElement;
+
     constructor(public userName: string) {
         Channel.list.push(this);
         this.getData().then(() => this.build())
@@ -35,30 +37,35 @@ class Channel {
         if (Channel.container === null) {
             throw new Error('No UL element found!');
         }
+        let link: HTMLAnchorElement;
         let logo: HTMLImageElement;
         let name: HTMLElement;
         let game: HTMLElement;
         let status: HTMLElement;
 
         this.element = Channel.template.content.querySelector('li') as HTMLLIElement;
+        link = this.element.querySelector('a') as HTMLAnchorElement;
         logo = this.element.querySelector('.logo') as HTMLImageElement;
         name = this.element.querySelector('.name') as HTMLElement;
         game = this.element.querySelector('.game') as HTMLElement;
         status = this.element.querySelector('.status') as HTMLElement;
 
-        if (this.online) {
-            this.element.classList.add('online');
-            this.element.classList.remove('offline');
-        } else {
-            this.element.classList.remove('online');
-            this.element.classList.add('offline');
-        }
 
         logo.src = this.logoUrl;
         name.innerText = this.displayName;
         game.innerText = this.game;
         status.innerText = this.status;
 
+        if (this.online) {
+            this.element.classList.add('online');
+            this.element.classList.remove('offline');
+            link.href = this.channelUrl;
+        } else {
+            this.element.classList.remove('online');
+            this.element.classList.add('offline');
+            status.innerText = 'Offline';
+            link.href = '#';
+        }
         const clone = document.importNode(this.element, true);
         Channel.container.appendChild(clone);
 
@@ -71,6 +78,7 @@ class Channel {
                 this.displayName = res.display_name;
                 this.status = res.status;
                 this.game = res.game;
+                this.channelUrl = res.url;
                 console.log(res);
             }).catch(err => console.log(err));
         let streamData: Promise<any> = fetch(urlBase + points.STREAMS + this.userName)
@@ -90,6 +98,35 @@ Channel.template = document.getElementById('channel-template') as HTMLTemplateEl
 Channel.container = document.getElementById('items') as HTMLUListElement;
 exampleUsers.forEach(user => new Channel(user));
 // let fcc = new Channel('freecodecamp');
+
+function showOnline() {
+    // let arr = Array.from((<HTMLElement>Channel.container).children);
+    // arr.forEach(el => {
+    (Channel.container as HTMLElement).childNodes.forEach((el: HTMLElement) => {
+        if (el.classList.contains('online')) {
+            el.classList.remove('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
+    })
+}
+function showOffline() {
+    // let arr = Array.from((<HTMLElement>Channel.container).children);
+    // arr.forEach(el => {
+    (Channel.container as HTMLElement).childNodes.forEach((el: HTMLElement) => {
+        if (el.classList.contains('offline')) {
+            el.classList.remove('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
+    })
+}
+function showAll() {
+    // let arr = Array.from((<HTMLElement>Channel.container).children);
+    // arr.forEach(el => el.classList.remove('hidden'));
+    (Channel.container as HTMLElement).childNodes.forEach((el: HTMLElement) => el.classList.remove('hidden'));
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // fetch(urlBase+'users/freecodecamp').then(res=>res.json()).then(x=>console.log(x))
