@@ -1,19 +1,35 @@
 header
     h1 Twitch Streamers
 main
-    ul
-        li.online Thing?
+    ul#toggles
+        li Online
+        li Offline
+        li All
+    ul#items
+        li.online
+            .logo channelData.logo
+            .name channelData.display_name
+            .game channelData.game
+            .status channelData.status
+        li.online
             .logo Logo
-            a.name Name
-            .current Watching
-        li.offline Thing?
+            .name Name
+            .game Game
+            .status Watching
+        li.offline
             .logo Logo
-            a.name Name
-            .current Watching
+            .name Name
+            .game Game
+            .status Watching
+        li.online
+            img.logo(src='https://static-cdn.jtvnw.net/jtv_user_pictures/ogamingsc2-profile_image-9021dccf9399929e-300x300.jpeg' width='50' height='50')
+            .name OgamingSC2
+            .game StarCraft II
+            .status KINGS OF THE NORTH - WINNER'S ROUND 2
 
-
-template
-    li Thing?
-        .logo Logo
-        a.name Name
-        .current Watching
+template#channel-template
+    li
+        img.logo(width='50' height='50')
+        .name Name
+        .game Game
+        .status Watching
