@@ -1,0 +1,71 @@
+body {
+    background: #222;
+    color: silver;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.board {
+    display: flex;
+    flex-direction: column;
+    margin: 10vh auto;
+}
+.row {
+    display: flex;
+}
+.cell {
+    width: 20vh;
+    height: 20vh;
+    min-width: 120px;
+    min-height: 120px;
+    max-width: 30vw;
+    max-height: 30vh;
+    background: #333;
+    margin: 4px;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &:hover {
+        background: #393939;
+    }
+}
+
+$cellBorder: #555;
+
+.center {
+    border-color: $cellBorder;
+}
+
+.left {
+    border-right-color: $cellBorder;
+}
+.top > .cell {
+    border-bottom-color: $cellBorder;
+}
+.bottom > .cell {
+    border-top-color: $cellBorder;
+}
+.right {
+    border-left-color: $cellBorder;
+}
+
+#svg-template {
+    display: none;
+}
+svg {
+    pointer-events: none;
+}
+
+use {
+    stroke-width: 4px;
+    stroke-dasharray: 400% 400%;
+    stroke-dashoffset: 400%;
+    animation: 1500ms ease-in-out draw-stroke forwards;
+}
+
+@keyframes draw-stroke {
+    to {
+        stroke-dashoffset: 0;
+    }
+}

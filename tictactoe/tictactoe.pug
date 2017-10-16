@@ -1,0 +1,35 @@
+header
+    h1 tic tac toe
+main
+    #board
+        .row.top
+            .cell.corner.left(data-loc="TL" data-mark="X"): svg(version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" width="120px" height="120px")
+                use(href="#X")
+            .cell.edge(data-loc="TM" data-mark="O"): svg(version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" width="120px" height="120px")
+                use(href="#O")
+            .cell.corner.right(data-loc="TR"): svg(version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" width="120px" height="120px")
+        .row.middle
+            .cell.edge.left(data-loc="ML"): svg(version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" width="120px" height="120px")
+            .cell.center(data-loc="MM"): svg(version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" width="120px" height="120px")
+            .cell.edge.right(data-loc="MR"): svg(version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" width="120px" height="120px")
+        .row.bottom
+            .cell.corner.left(data-loc="BL"): svg(version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" width="120px" height="120px")
+            .cell.edge(data-loc="BM"): svg(version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" width="120px" height="120px")
+            .cell.corner.right(data-loc="BR"): svg(version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" width="120px" height="120px")
+svg(id="svg-template" version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" width="120px" height="120px")
+    g(id="X" fill-opacity="0")
+        path(d="M60,60L0,0l20,0M60,60L0,0l0,20M60,60L0,120l20,0M60,60L0,120l0-20" stroke-width="3" stroke="#0FF")
+        //- path(d="M60,60L0,0l20,0" stroke-width="3" stroke="#0FF")
+        //- path(d="M60,60L0,0l0,20" stroke-width="3" stroke="#0FF")
+        path(d="M60,60L120,0l-20,0" stroke-width="3" stroke="#FF0")
+        path(d="M60,60L120,0l0,20" stroke-width="3" stroke="#FF0")
+        //- path(d="M60,60L0,120l20,0" stroke-width="3" stroke="#0FF")
+        //- path(d="M60,60L0,120l0-20" stroke-width="3" stroke="#0FF")
+        path(d="M60,60L120,120l-20,0" stroke-width="3" stroke="#FF0")
+        path(d="M60,60L120,120l0,-20" stroke-width="3" stroke="#FF0")
+    g(id="O" fill-opacity="0")
+        path(d="M60,0A60,60,0,0,1,120,60L70,60" stroke-width="3" stroke="#FFF")
+        path(d="M120,60A60,60,0,0,1,60,120L60,70" stroke-width="3" stroke="#FFF")
+        path(d="M60,120A60,60,0,0,1,0,60L50,60" stroke-width="3" stroke="#FFF")
+        path(d="M0,60A60,60,0,0,1,60,0L60,50" stroke-width="3" stroke="#FFF")
+        //- circle(id="O" cx="60" cy="60" r="60" fill-opacity="0" stroke="#F0F")
