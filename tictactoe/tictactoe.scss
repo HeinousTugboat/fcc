@@ -29,6 +29,12 @@ body {
     &:hover {
         background: #393939;
     }
+    &:after {
+        content: attr(data-loc);
+        position: absolute;
+        font-size: 100px;
+        opacity: 0.2;
+    }
 }
 
 $cellBorder: #555;
