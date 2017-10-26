@@ -76,10 +76,13 @@ class TicTacToe {
     }
     reset() {
         this.state.fill(0);
+        this.current = marks.X;
         this.cells.forEach((el) => {
             delete el.dataset.mark;
+            delete el.dataset.score;
             (el.querySelector('svg') as SVGElement).innerHTML = '';
         })
+        this.won = false;
     }
     /**
      * Returns -9, 0 or +9. 9 means O wins, -9 means X wins, 0 means nobody has
