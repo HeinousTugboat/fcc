@@ -15,6 +15,7 @@ class TicTacToe {
     private board: HTMLElement;
     private cells: NodeListOf<HTMLElement> = document.querySelectorAll('.cell') as NodeListOf<HTMLElement>;
     private human = 'X';
+    private current = marks.X;
     // private twoPlayer = true;
     private twoPlayer = false;
     private state = Array(9).fill(0);
@@ -43,11 +44,13 @@ class TicTacToe {
                 let el = Array.from(this.cells).filter(cell=>cell.dataset.loc == ''+next)[0];
                 this.setO(el);
             }
+            this.checkMinimax();
         } else if (this.human === 'O' && this.twoPlayer) {
             this.setO(el);
             if (this.twoPlayer) {
                 this.human = 'X';
             }
+            this.checkMinimax();
         } else {
             return;
         }
@@ -58,10 +61,12 @@ class TicTacToe {
         useEl.setAttribute('href', '#X');
         (el.querySelector('svg') as SVGElement).appendChild(useEl);
         this.state[+(el.dataset.loc as string)] = marks.X;
+        el.dataset.score = '';
         if (this.checkState() <= marks.X * 9) {
             console.log('X wins!');
             this.won = true;
         }
+        this.current = marks.O;
     }
     setO(el: HTMLElement) {
         el.dataset.mark = 'O';
@@ -69,10 +74,12 @@ class TicTacToe {
         useEl.setAttribute('href', '#O');
         (el.querySelector('svg') as SVGElement).appendChild(useEl);
         this.state[+(el.dataset.loc as string)] = marks.O;
+        el.dataset.score = '';
         if (this.checkState() >= marks.O * 9) {
             console.log('O wins!');
             this.won = true;
         }
+        this.current = marks.X;
     }
     reset() {
         this.state.fill(0);
@@ -88,7 +95,7 @@ class TicTacToe {
      * Returns -9, 0 or +9. 9 means O wins, -9 means X wins, 0 means nobody has
      * a winning line.
      */
-    checkState(state: number[] = [...this.state], depth: number = 1) {
+    checkState(state: number[] = [...this.state], depth: number = 0) {
         let result = this.winConditions.reduce((bestScore, winState) => {
             if (Math.abs(bestScore) >= 3) {
                 return bestScore;
@@ -134,7 +141,10 @@ class TicTacToe {
         if (state[move] === 0) {
             state[move] = mark;
         }
-        return this.checkState(state);
+        let score = this.checkState(state);
+        let el = Array.from(this.cells).filter(cell=>cell.dataset.loc == ''+move)[0];
+        el.dataset.score = ''+score;
+        return score;
     }
 
     /**
@@ -180,7 +190,8 @@ class TicTacToe {
         let moves: number[] = [];
         let best = -Infinity;
         game.findMoves().forEach(move=>{
-            let score = this.negamax(this.newState(-mark, this.state, move), 1, -mark);
+            let score = this.minimax(this.newState(mark, this.state, move),0,false,mark);
+            // let score = this.negamax(this.newState(-mark, this.state, move), 1, -mark);
             if (score > best) {
                 best = score;
                 moves = [move];
@@ -190,6 +201,89 @@ class TicTacToe {
         })
         console.log('score: '+best+' moves: '+moves);
         return moves[Math.floor(Math.random()*moves.length)];
+    }
+
+    // First, evaluate all of current player's potential moves.
+    //  If 0, then evaluate all potential responses for that move.
+    //      If response is win, then return score.
+    //      If repsonse is 0, continue evaluating.
+    //  If win, then return score
+    // Once every square has a score, select highest score, adjusting for depth.
+
+    // 01 function minimax(node, depth, maximizingPlayer)
+    // 02     if depth = 0 or node is a terminal node
+    // 03         return the heuristic value of node
+
+    // 04     if maximizingPlayer
+    // 05         bestValue := −∞
+    // 06         for each child of node
+    // 07             v := minimax(child, depth − 1, FALSE)
+    // 08             bestValue := max(bestValue, v)
+    // 09         return bestValue
+
+    // 10     else    (* minimizing player *)
+    // 11         bestValue := +∞
+    // 12         for each child of node
+    // 13             v := minimax(child, depth − 1, TRUE)
+    // 14             bestValue := min(bestValue, v)
+    // 15         return bestValue
+    // (* Initial call for maximizing player *)
+    // minimax(origin, depth, TRUE)
+
+    minimax(state: number[] = [...this.state], depth: number = 0, maximizingPlayer: boolean = false, flavor: marks = marks.O) {
+        const score = this.checkState(state);
+        if (score !== 0) {
+            return score*flavor;
+        }
+        let best: number;
+        if (maximizingPlayer) {
+            best = -Infinity;
+            for (let move of this.findMoves(state)) {
+                let newState = [...state];
+                newState[move] = flavor;
+                let v = this.minimax(newState, depth + 1, false, flavor);
+                if (v!== 0) {
+                    v--;
+                }
+                best = Math.max(best, v);
+            }
+        } else {
+            best = Infinity;
+            for (let move of this.findMoves(state)) {
+                let newState = [...state];
+                newState[move] = flavor * -1;
+                let v = this.minimax(newState, depth + 1, true, flavor);
+                if (v !== 0) {
+                    v++;
+                }
+                best = Math.min(best, v);
+            }
+        }
+        if (Math.abs(best) === Infinity) {
+            return 0;
+        } else {
+            return best;
+        }
+    }
+
+    checkMinimax(mark: marks = this.current) {
+        let best = -Infinity;
+
+        return this.findMoves().reduce((acc: number[], move)=>{
+            let score = this.minimax(this.newState(mark, this.state, move),0,false,mark);
+            let el = Array.from(this.cells).filter(cell=>cell.dataset.loc == ''+move)[0];
+            el.dataset.score = ''+(score+10);
+            console.log(move+'#: '+score+'['+best+']');
+            if (score > best) {
+                best = score;
+                return [move];
+            } else if (score === best) {
+                return [...acc, move];
+            } else {
+                return acc;
+            }
+        }, []);
+
     }
 
 }
