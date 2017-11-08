@@ -78,6 +78,13 @@ button {
     }
 }
 
+#button-container {
+    display: flex;
+    .active {
+        opacity: 1;
+    }
+}
+
 #modal-container {
     position: fixed;
     top: 0;
@@ -86,19 +93,40 @@ button {
     right: 0;
     z-index: 100;
     background: rgba(240,240,240,0.2);
+    visibility: hidden;
+    opacity: 0;
+    transition: all 75ms ease-in-out;
+    &.active {
+        visibility: visible;
+        opacity: 1;
+    }
 
-    #modal-content {
-        margin: 25vh 25vw;
+    > div {
+        margin: 25vh 30vw;
         padding: 1em;
         text-align: center;
         border: 2px solid #333;
         border-radius: 8px;
-        background: rgba(0,0,0,0.65);
-        // position: fixed;
-        // top: 0;
-        // left: 0;
-        // right: 0;
-        // bottom: 0;
+        background: rgba(0,0,0,0.85);
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        visibility: hidden;
+        opacity: 0;
+        transition: inherit;
+        &.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        h2 {
+            font-size: 36px;
+        }
+
+        button {
+            opacity: 1;
+        }
 
     }
 }

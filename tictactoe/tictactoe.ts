@@ -14,7 +14,14 @@ let counter = 0;
 class TicTacToe {
     private board: HTMLElement;
     private cells: NodeListOf<HTMLElement> = document.querySelectorAll('.cell') as NodeListOf<HTMLElement>;
-    private human = 'X';
+    private modalContainer = document.getElementById('modal-container') as HTMLElement;
+    private xModal = document.getElementById('x-wins') as HTMLElement;
+    private oModal = document.getElementById('o-wins') as HTMLElement;
+    private drawModal = document.getElementById('draw') as HTMLElement;
+    private humanXButton = document.getElementById('human-x') as HTMLElement;
+    private humanOButton = document.getElementById('human-o') as HTMLElement;
+    private twoPlayerButton = document.getElementById('two-player') as HTMLElement;
+    private human = marks.X;
     private current = marks.X;
     // private twoPlayer = true;
     private twoPlayer = false;
@@ -24,7 +31,8 @@ class TicTacToe {
         [0, 3, 6], [1, 4, 7], [2, 5, 8],
         [0, 4, 8], [2, 4, 6]
     ];
-    private won = false;
+    private won: marks = 0;
+    private resetTimeout: number | undefined;
     constructor() {
         this.board = document.getElementById('board') as HTMLElement;
         this.board.addEventListener('click', this.click.bind(this), true);
@@ -32,56 +40,122 @@ class TicTacToe {
     click(ev: Event) {
         const el: HTMLElement = ev.target as HTMLElement;
         let loc = el.dataset.loc;
-        if (!loc || el.dataset.mark !== undefined || this.won) {
+        if (!loc || el.dataset.mark !== undefined || this.won !== 0) {
             return;
         }
-        if (this.human === 'X') {
+        if (this.human === marks.X && this.current === marks.X) {
             this.setX(el);
             if (this.twoPlayer) {
-                this.human = 'O';
+                this.human = marks.O;
             } else if (!this.won) {
-                let next = this.evaluatePosition(marks.O);
-                let el = Array.from(this.cells).filter(cell=>cell.dataset.loc == ''+next)[0];
-                this.setO(el);
+                this.processAIMove(marks.O);
             }
             this.checkMinimax();
-        } else if (this.human === 'O' && this.twoPlayer) {
+        } else if (this.human === marks.O && this.current === marks.O) {
             this.setO(el);
             if (this.twoPlayer) {
-                this.human = 'X';
+                this.human = marks.X;
+            } else if (!this.won) {
+                this.processAIMove(marks.X);
             }
             this.checkMinimax();
         } else {
             return;
         }
     }
+    processAIMove(mark: marks = marks.O) {
+        let next = this.evaluatePosition(mark);
+        let el = Array.from(this.cells).filter(cell=>cell.dataset.loc == ''+next)[0];
+        if (el === undefined) {
+            return;
+        }
+        if (mark === marks.O) {
+            this.setO(el);
+        } else if (mark === marks.X) {
+            this.setX(el);
+        }
+    }
     setX(el: HTMLElement) {
-        el.dataset.mark = 'X';
+        el.dataset.mark = ''+marks.X;
         const useEl = document.createElementNS(svgNS, 'use');
         useEl.setAttribute('href', '#X');
         (el.querySelector('svg') as SVGElement).appendChild(useEl);
         this.state[+(el.dataset.loc as string)] = marks.X;
         el.dataset.score = '';
         if (this.checkState() <= marks.X * 9) {
-            console.log('X wins!');
-            this.won = true;
+            // console.log('X wins!');
+            this.won = marks.X;
+            this.displayWinModal();
+        } else if (this.findMoves().length === 0) {
+            this.won = 0;
+            this.displayWinModal();
+            // this.displayDrawModal();
         }
         this.current = marks.O;
     }
     setO(el: HTMLElement) {
-        el.dataset.mark = 'O';
+        el.dataset.mark = ''+marks.O;
         const useEl = document.createElementNS(svgNS, 'use');
         useEl.setAttribute('href', '#O');
         (el.querySelector('svg') as SVGElement).appendChild(useEl);
         this.state[+(el.dataset.loc as string)] = marks.O;
         el.dataset.score = '';
         if (this.checkState() >= marks.O * 9) {
-            console.log('O wins!');
-            this.won = true;
+            // console.log('O wins!');
+            this.won = marks.O;
+            this.displayWinModal();
+        } else if (this.findMoves().length === 0) {
+            this.won = 0;
+            this.displayWinModal();
+            // this.displayDrawModal();
         }
         this.current = marks.X;
     }
+    selectHuman(mark: marks) {
+        if (this.twoPlayer) {
+            return;
+        }
+        this.human = mark;
+        this.humanXButton.classList.toggle('active');
+        this.humanOButton.classList.toggle('active');
+        if (mark === marks.O && this.current === marks.X) {
+            this.processAIMove(marks.X);
+        } else if (mark === marks.X && this.current === marks.O) {
+            this.processAIMove(marks.O);
+        }
+    }
+    toggleTwoPlayer() {
+        this.twoPlayer = !this.twoPlayer;
+        this.twoPlayerButton.classList.toggle('active');
+        // if (this.twoPlayer) {
+        //     this.twoPlayer = false;
+        // } else if (!this.twoPlayer) {
+        //     this.twoPlayer = true;
+        // }
+    }
+    displayWinModal() {
+        this.modalContainer.classList.add('active');
+        switch (this.won) {
+            case marks.X:
+                this.xModal.classList.add('active');
+                break;
+            case marks.O:
+                this.oModal.classList.add('active');
+                break;
+            default:
+                this.drawModal.classList.add('active');
+        }
+        this.resetTimeout = setTimeout(this.reset.bind(this), 2000);
+    }
+    displayDrawModal() {
+        console.log('this round was a draw!');
+        this.resetTimeout = setTimeout(this.reset.bind(this), 2000);
+    }
     reset() {
+        if (this.resetTimeout !== undefined) {
+            clearTimeout(this.resetTimeout);
+            this.resetTimeout = undefined;
+        }
         this.state.fill(0);
         this.current = marks.X;
         this.cells.forEach((el) => {
@@ -89,7 +163,18 @@ class TicTacToe {
             delete el.dataset.score;
             (el.querySelector('svg') as SVGElement).innerHTML = '';
         })
-        this.won = false;
+        this.won = 0;
+
+        this.modalContainer.classList.remove('active');
+        this.xModal.classList.remove('active');
+        this.oModal.classList.remove('active');
+        this.drawModal.classList.remove('active');
+
+        if (this.human !== this.current && !this.twoPlayer) {
+            this.processAIMove(marks.X);
+        } else if (this.twoPlayer) {
+            this.human = this.current;
+        }
     }
     /**
      * Returns -9, 0 or +9. 9 means O wins, -9 means X wins, 0 means nobody has
@@ -153,7 +238,7 @@ class TicTacToe {
     selectMove(mark: marks = marks.O, state: number[] = [...this.state]) {
         return this.findMoves(state).reduce((acc: { max: number, moves: number[] }, move) => {
             let score = this.scoreMove(move, mark, [...state]);
-            console.log((mark > 0 ? 'O' : 'X') + ' move: ' + move + ' score: ' + score + ' best: ' + acc.max + ' moves: ' + acc.moves);
+            // console.log((mark > 0 ? marks.O : marks.X) + ' move: ' + move + ' score: ' + score + ' best: ' + acc.max + ' moves: ' + acc.moves);
             if (mark * score > mark * acc.max) {
                 acc = { max: score, moves: [move] };
             } else if (mark * score === mark * acc.max) {
@@ -199,7 +284,7 @@ class TicTacToe {
                 moves.push(move);
             }
         })
-        console.log('score: '+best+' moves: '+moves);
+        // console.log('score: '+best+' moves: '+moves);
         return moves[Math.floor(Math.random()*moves.length)];
     }
 
@@ -273,7 +358,7 @@ class TicTacToe {
             let score = this.minimax(this.newState(mark, this.state, move),0,false,mark);
             let el = Array.from(this.cells).filter(cell=>cell.dataset.loc == ''+move)[0];
             el.dataset.score = ''+(score+10);
-            console.log(move+'#: '+score+'['+best+']');
+            // console.log(move+'#: '+score+'['+best+']');
             if (score > best) {
                 best = score;
                 return [move];

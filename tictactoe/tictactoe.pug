@@ -14,10 +14,21 @@ main
             .cell.corner.left(data-loc="6"): svg(version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" width="120px" height="120px")
             .cell.edge(data-loc="7"): svg(version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" width="120px" height="120px")
             .cell.corner.right(data-loc="8"): svg(version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" width="120px" height="120px")
-button#reset(onClick="game.reset()") Reset
-//- #modal-container
-    #modal-content
-        | Boop
+#button-container
+    button#human-x(onClick="game.selectHuman(marks.X)").active X
+    button#human-o(onClick="game.selectHuman(marks.O)") O
+    button#reset(onClick="game.reset()") Reset
+    button#two-player(onClick="game.toggleTwoPlayer()") Two Player
+#modal-container
+    #x-wins
+        h2 X Wins!
+        button(onClick="game.reset()") Try Again
+    #o-wins
+        h2 O Wins!
+        button(onClick="game.reset()") Try Again
+    #draw
+        h2 Nobody Wins!
+        button(onClick="game.reset()") Try Again
 svg(id="svg-template" version="1.1" xmlns="http://www.w3.org/2000/svg" baseProfile="full" width="120px" height="120px")
     g(id="X" fill-opacity="0")
         //- path(d="M60,60L0,0l20,0M60,60L0,0l0,20M60,60L0,120l20,0M60,60L0,120l0-20" stroke-width="3" stroke="#0FF")
