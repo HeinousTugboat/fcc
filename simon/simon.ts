@@ -79,3 +79,52 @@
  * User Story: I can win the game by getting a series of 20 steps correct. I am
  * notified of my victory, then the game starts over.
  **/
+
+declare const webkitAudioContext: AudioContext;
+
+class Simon {
+    private ctx: AudioContext;
+    private level: 1|2|3|4;
+    private game: 0|1|2|3;
+    private rng = 0;
+    constructor() {
+        try {
+            this.ctx = new (AudioContext || webkitAudioContext)();
+        } catch (e) {
+            throw new Error('No Audio Context! '+e);
+        };
+        this.tick();
+    }
+
+    tick() {
+        if (this.rng >= 4) {
+            this.rng = 1;
+        } else {
+            this.rng++;
+        }
+        requestAnimationFrame(this.tick.bind(this));
+    }
+
+    playTone(freq: number, time: number) {
+        const oscillator = this.ctx.createOscillator();
+        oscillator.type = 'square';
+        oscillator.frequency.value = freq;
+        oscillator.connect(this.ctx.destination);
+        oscillator.start();
+        setTimeout(()=>oscillator.stop(), time);
+    }
+    playGreen = (time: number) => this.playTone(415, time);
+    playRed = (time: number) => this.playTone(310, time);
+    playYellow = (time: number) => this.playTone(252, time);
+    playBlue = (time: number) => this.playTone(209, time);
+    playLose = (time: number) => this.playTone(42, time);
+
+    click() { }
+    last() { }
+    start() { }
+    longest() { }
+    setLevel(level: number) { }
+    setGame(mode: number) { }
+
+
+}
