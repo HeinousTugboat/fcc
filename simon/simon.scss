@@ -1,9 +1,20 @@
+$green: hsla(120, 100%, 50%, 1.0);
+$red: hsla(0, 100%, 50%, 1.0);
+$yellow: hsla(60, 100%, 50%, 1.0);
+$blue: hsla(240, 100%, 50%, 1.0);
+
+$green_50: transparentize($green, 0.5);
+$red_50: transparentize($red, 0.5);
+$yellow_50: transparentize($yellow, 0.5);
+$blue_50: transparentize($blue, 0.5);
+
 body {
     background: #222;
     color: silver;
     display: flex;
     flex-direction: column;
     align-items: center;
+    font-family: 'Roboto', sans-serif;
 }
 #board {
     display: flex;
@@ -11,29 +22,43 @@ body {
     flex-wrap: wrap;
     margin: 10vh auto;
     position: relative;
-    > div {
+    > #top, > #bottom {
         display: flex;
-    }
-    > div > div {
-        width: 200px;
-        height: 200px;
-        border: 4px solid transparent;
-        margin: 2px;
-        &#green {
-            border-radius: 100% 0 0 0;
-            background: green;
-        }
-        &#red {
-            border-radius: 0 100% 0 0;
-            background: red;
-        }
-        &#yellow {
-            border-radius: 0 0 0 100%;
-            background: yellow;
-        }
-        &#blue {
-            border-radius: 0 0 100% 0;
-            background: blue;
+        > div {
+            width: 200px;
+            height: 200px;
+            border: 4px solid transparent;
+            margin: 2px;
+            transition: all 150ms ease-in-out;
+
+            &#green {
+                border-radius: 100% 0 0 0;
+                background: $green;
+                &:hover {
+                    background: $green_50;
+                }
+            }
+            &#red {
+                border-radius: 0 100% 0 0;
+                background: $red;
+                &:hover {
+                    background: $red_50;
+                }
+            }
+            &#yellow {
+                border-radius: 0 0 0 100%;
+                background: $yellow;
+                &:hover {
+                    background: $yellow_50;
+                }
+            }
+            &#blue {
+                border-radius: 0 0 100% 0;
+                background: $blue;
+                &:hover {
+                    background: $blue_50;
+                }
+            }
         }
     }
 }
@@ -48,4 +73,72 @@ body {
     border: 0px solid #000;
     border-radius: 100%;
     background: #222;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    > div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        div {
+            // border: 1px solid #F0F;
+            // background: #F0FA;
+            // color: white;
+        }
+    }
+}
+
+#mode, #level {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 4px;
+    .switches {
+        border: 1px solid #FFF9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    input {
+        position: absolute;
+        height: 1px;
+        width: 1px;
+        overflow: hidden;
+        clip: rect(0,0,0,0);
+        border: 0;
+        &:checked+label {
+            border-color: white;
+            background: #FFFE;
+            color: #222;
+        }
+    }
+    label {
+        display: inline-block;
+        border: 0px solid transparent;
+        text-align: center;
+        transition: all 150ms ease-in-out;
+        padding: 2px 4px;
+        &:hover {
+            background: #FFF7;
+            color: #222;
+        }
+    }
+
+}
+
+button {
+    border: 1px solid #FFF9;
+    background: #222;
+    color: silver;
+    font-family: inherit;
+    font-size: 80%;
+    padding: 2px 4px;
+    margin: 2px;
+    :hover {
+        background: #FFF7;
+        color: #222;
+    }
 }

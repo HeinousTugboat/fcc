@@ -19,13 +19,6 @@ export { }
         3   20
         4   31
 
-    Tones:
-        Green:  415Hz   (G#4/415.305Hz)
-        Red:    310Hz   (D#4/311.127Hz)
-        Yellow: 252Hz    (B3/247.942Hz)
-        Blue:   209Hz   (G#3/207.652Hz)
-        Fail:   42Hz
-
     Links:
         https://en.wikipedia.org/wiki/Simon_%28game%29
         https://www.hasbro.com/common/instruct/Simon.PDF
@@ -83,49 +76,267 @@ export { }
 
 declare const webkitAudioContext: AudioContext;
 
+/** Default gain for tones. 1.00 is deafening for me.. 0.25 sounds decent. */
+const volume = 0.25;
+
+enum Colors {
+    YELLOW = 1,
+    BLUE = 2,
+    RED = 3,
+    GREEN = 4
+}
+
 class Simon {
     private ctx: AudioContext;
-    private level: 1|2|3|4;
-    private game: 0|1|2|3;
+    private gainNode: GainNode;
+    private game: 1 | 2 | 3;
+    private level: 1 | 2 | 3 | 4;
     private rng = 0;
+    private isPlaying = false;
+    private hasWon = false;
+    private startTime: number;
+    private inputTime: number;
+    private isWaiting: boolean = false;
+    private currentGame: 1 | 2 | 3;
+    private currentLevel: 1 | 2 | 3 | 4;
+
+    // The div elements, pulled in by the constructor.
+    private boardElement: HTMLDivElement;
+    private yellowElement: HTMLDivElement;
+    private redElement: HTMLDivElement;
+    private greenElement: HTMLDivElement;
+    private blueElement: HTMLDivElement;
+    private modeElement: HTMLDivElement;
+    private levelElement: HTMLDivElement;
+    private lastButton: HTMLButtonElement;
+    private startButton: HTMLButtonElement;
+    private longestButton: HTMLButtonElement;
+
+    // Keep track of longest streak, last streak, and current streak;
+    private lastMoves: Colors[] = [];
+    private longestMoves: Colors[] = [];
+    private currentMoves: Colors[] = [];
+
+
     constructor() {
+
         try {
             this.ctx = new (AudioContext || webkitAudioContext)();
+            this.gainNode = this.ctx.createGain();
+            this.gainNode.gain.value = volume;
+            this.gainNode.connect(this.ctx.destination);
         } catch (e) {
-            throw new Error('No Audio Context! '+e);
+            throw new Error('No Audio Context! ' + e);
         };
+
+        this.boardElement = document.getElementById('board') as HTMLDivElement;
+        this.yellowElement = document.getElementById('yellow') as HTMLDivElement;
+        this.redElement = document.getElementById('red') as HTMLDivElement;
+        this.greenElement = document.getElementById('green') as HTMLDivElement;
+        this.blueElement = document.getElementById('blue') as HTMLDivElement;
+        this.modeElement = document.getElementById('mode') as HTMLDivElement;
+        this.levelElement = document.getElementById('level') as HTMLDivElement;
+        this.lastButton = document.getElementById('last') as HTMLButtonElement;
+        this.startButton = document.getElementById('start') as HTMLButtonElement;
+        this.longestButton = document.getElementById('longest') as HTMLButtonElement;
+
+        this.boardElement.addEventListener('click', this.clickHandler.bind(this), true);
         this.tick();
     }
 
+    /**
+     * Processes ticks. Uses an RNG similar to how the original did, by simply
+     * iterating a counter every pulse. Unfortunately, this runs at 60Hz instead
+     * of 4400Hz like the original. I'm not clever enough to perfectly emulate
+     * that. :-|
+     *
+     * NB: Recursively calles into rAF to cycle, only call once.
+     *
+     * @memberof Simon
+     */
     tick() {
         if (this.rng >= 4) {
             this.rng = 1;
         } else {
             this.rng++;
         }
+        if (this.isWaiting) {
+            let now = performance.now();
+            if (now > this.inputTime + 3000) {
+                this.loseGame();
+            }
+        } else if (this.isPlaying) {
+             now = performance.now();
+        }
         requestAnimationFrame(this.tick.bind(this));
     }
 
+    /**
+     * Plays a square wave oscillator for the given time at the given frequency.
+     *
+     * @param {number} freq
+     * @param {number} time
+     * @memberof Simon
+     */
     playTone(freq: number, time: number) {
         const oscillator = this.ctx.createOscillator();
         oscillator.type = 'square';
         oscillator.frequency.value = freq;
-        oscillator.connect(this.ctx.destination);
+        oscillator.connect(this.gainNode);
         oscillator.start();
-        setTimeout(()=>oscillator.stop(), time);
+        setTimeout(() => oscillator.stop(), time);
     }
-    playGreen = (time: number) => this.playTone(415, time);
-    playRed = (time: number) => this.playTone(310, time);
-    playYellow = (time: number) => this.playTone(252, time);
-    playBlue = (time: number) => this.playTone(209, time);
-    playLose = (time: number) => this.playTone(42, time);
+    /** Plays the Green Tone: 415Hz (G#4/415.305Hz) */
+    playGreen = (time: number = 420) => this.playTone(415, time);
+    /** Plays the Red Tone: 310Hz (D#4/311.127Hz) */
+    playRed = (time: number = 420) => this.playTone(310, time);
+    /** Plays the Yellow Tone: 252Hz (B3/247.942Hz) */
+    playYellow = (time: number = 420) => this.playTone(252, time);
+    /** Plays the Blue Tone: 209Hz (G#3/207.652Hz) */
+    playBlue = (time: number = 420) => this.playTone(209, time);
+    /** Plays the Fail Tone: 42Hz, defaults to 1.5s */
+    playLose = (time: number = 1500) => this.playTone(42, time);
 
-    click() { }
-    last() { }
-    start() { }
-    longest() { }
-    setLevel(level: number) { }
-    setGame(mode: number) { }
+    /**
+     * Click Handler! Instead of wiring up individual onClicks on the HTML
+     * Elements, this project will route all clickhandling through one place.
+     * Here.
+     *
+     * @param {Event} ev
+     * @memberof Simon
+     */
+    clickHandler(ev: Event) {
+        let fail = false;
+        if (this.isWaiting || !this.isPlaying) {
+            this.isWaiting = false;
+            this.inputTime = performance.now();
+            switch (ev.target) {
+                case this.greenElement:
+                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.GREEN || !this.isPlaying) {
+                        this.playGreen(500);
+                    } else {
+                        fail = true;
+                    }
+                    break;
+                case this.redElement:
+                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.RED || !this.isPlaying) {
+                        this.playRed(500);
+                    } else {
+                        fail = true;
+                    }
+                    break;
+                case this.blueElement:
+                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.BLUE || !this.isPlaying) {
+                        this.playBlue(500);
+                    } else {
+                        fail = true;
+                    }
+                    break;
+                case this.yellowElement:
+                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.YELLOW || !this.isPlaying) {
+                        this.playYellow(500);
+                    } else {
+                        fail = true;
+                    }
+                    break;
+                case this.startButton:
+                    this.start();
+                    break;
+                case this.lastButton:
+                    this.last();
+                    break;
+                case this.longestButton:
+                    this.longest();
+                    break;
+                case this.modeElement:
+                case this.levelElement:
+                default:
+                    // console.log(ev.target);
+                    break;
+            }
+        }
+        if ((ev.target as HTMLElement).nodeName === 'INPUT') {
+            const el: HTMLInputElement = ev.target as HTMLInputElement;
+            // console.log(el.id, el.name, el.value);
+            if (el.name === 'mode-selector') {
+                this.setGame(parseInt(el.value));
+            }
+            if (el.name === 'level-selector') {
+                this.setLevel(parseInt(el.value));
+            }
+        }
+        if (fail) {
+            this.loseGame();
+        }
+    }
+
+    get delay() {
+        if (this.currentMoves.length <= 5) {
+            return 420;
+        } else if (this.currentMoves.length <= 14) {
+            return 320;
+        } else {
+            return 220;
+        }
+
+    }
+
+    addMove() {
+        const delay = this.delay;
+        this.currentMoves.push(this.rng);
+        this.inputTime = performance.now() + delay;
+        switch (this.rng) {
+            case Colors.BLUE:
+                this.playBlue(delay);
+                break;
+            case Colors.RED:
+                this.playRed(delay);
+                break;
+            case Colors.YELLOW:
+                this.playYellow(delay);
+                break;
+            case Colors.GREEN:
+                this.playGreen(delay);
+                break;
+        }
+        this.isWaiting = true;
+    }
+
+    loseGame() {
+        console.log('Game lost!');
+        this.playLose();
+        this.isPlaying = false;
+        this.isWaiting = false;
+        this.lastMoves = [...this.currentMoves];
+    }
+
+    start() {
+        console.log('start!');
+        this.isPlaying = true;
+        this.isWaiting = false;
+        this.startTime = performance.now();
+        this.addMove();
+    }
+    last() {
+        console.log('last!');
+    }
+    longest() {
+        console.log('longest!');
+    }
+    setLevel(level: number) {
+        console.log('setLevel', level);
+        if (this.level !== level) {
+            this.level = level as (1 | 2 | 3 | 4);
+        }
+    }
+    setGame(mode: number) {
+        console.log('setGame', mode);
+        if (this.game !== mode) {
+            this.game = mode as (1 | 2 | 3);
+        }
+    }
 
 
 }
+
+const game = new Simon;

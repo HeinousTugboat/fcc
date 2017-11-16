@@ -3,9 +3,34 @@ header
 main
     #board
         #top
-            #green G
-            #red R
+            #green
+            #red
         #bottom
-            #yellow Y
-            #blue B
-        #center Center
+            #yellow
+            #blue
+        #center
+            #top-row
+                #mode
+                    .switch-title Mode
+                    .switches
+                        input(type="radio" id="mode-1" name="mode-selector" value="1" checked)
+                        label(for="mode-1") 1
+                        input(type="radio" id="mode-2" name="mode-selector" value="2")
+                        label(for="mode-2") 2
+                        input(type="radio" id="mode-3" name="mode-selector" value="3")
+                        label(for="mode-3") 3
+                #level
+                    .switch-title Level
+                    .switches
+                        input(type="radio" id="level-1" name="level-selector" value="1" checked)
+                        label(for="level-1") 1
+                        input(type="radio" id="level-2" name="level-selector" value="2")
+                        label(for="level-2") 2
+                        input(type="radio" id="level-3" name="level-selector" value="3")
+                        label(for="level-3") 3
+                        input(type="radio" id="level-4" name="level-selector" value="4")
+                        label(for="level-4") 4
+            #bottom-row
+                button#last Last!
+                button#start Start!
+                button#longest Longest!
