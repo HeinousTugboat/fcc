@@ -77,7 +77,8 @@ export { }
 declare const webkitAudioContext: AudioContext;
 
 /** Default gain for tones. 1.00 is deafening for me.. 0.25 sounds decent. */
-const volume = 0.25;
+// const volume = 0.25;
+const volume = 0.05;
 
 enum Colors {
     YELLOW = 1,
@@ -92,11 +93,14 @@ class Simon {
     private game: 1 | 2 | 3;
     private level: 1 | 2 | 3 | 4;
     private rng = 0;
+    private isActive = false;
+    private isWaiting = false;
+    private isHolding = false;
     private isPlaying = false;
+    private currentlyPlaying: IterableIterator<boolean>;
     private hasWon = false;
     private startTime: number;
     private inputTime: number;
-    private isWaiting: boolean = false;
     private currentGame: 1 | 2 | 3;
     private currentLevel: 1 | 2 | 3 | 4;
 
@@ -155,18 +159,24 @@ class Simon {
      * @memberof Simon
      */
     tick() {
+        const now = performance.now();
         if (this.rng >= 4) {
             this.rng = 1;
         } else {
             this.rng++;
         }
         if (this.isWaiting) {
-            let now = performance.now();
-            if (now > this.inputTime + 3000) {
+            if (now >= this.inputTime + 3000) {
                 this.loseGame();
             }
-        } else if (this.isPlaying) {
-             now = performance.now();
+        } else if (this.isActive) {
+            // This is where we process the system's move...
+        } else if (this.isHolding) {
+            if (now >= this.inputTime + 800) {
+                this.addMove();
+            }
+            // } else if (this.isPlaying) {
+            // console.log(this.currentlyPlaying.next());
         }
         requestAnimationFrame(this.tick.bind(this));
     }
@@ -178,24 +188,74 @@ class Simon {
      * @param {number} time
      * @memberof Simon
      */
-    playTone(freq: number, time: number) {
-        const oscillator = this.ctx.createOscillator();
-        oscillator.type = 'square';
-        oscillator.frequency.value = freq;
-        oscillator.connect(this.gainNode);
-        oscillator.start();
-        setTimeout(() => oscillator.stop(), time);
+    playTone(freq: number, time: number, color: Colors = 0): Promise<boolean> { // TODO: Replace this with Promises? Hmmm.
+        return new Promise((resolve, reject) => {
+
+            const oscillator = this.ctx.createOscillator();
+            let el: HTMLElement = this.boardElement;
+            switch (color) {
+                case Colors.BLUE: el = this.blueElement; break;
+                case Colors.GREEN: el = this.greenElement; break;
+                case Colors.RED: el = this.redElement; break;
+                case Colors.YELLOW: el = this.yellowElement; break;
+            }
+            oscillator.type = 'square';
+            oscillator.frequency.value = freq;
+            oscillator.connect(this.gainNode);
+            oscillator.start();
+            el.classList.add('active')
+            setTimeout(() => {
+                oscillator.stop();
+                el.classList.remove('active');
+                resolve(true);
+            }, time);
+        });
     }
     /** Plays the Green Tone: 415Hz (G#4/415.305Hz) */
-    playGreen = (time: number = 420) => this.playTone(415, time);
+    playGreen = (time: number = 420) => this.playTone(415, time, Colors.GREEN);
     /** Plays the Red Tone: 310Hz (D#4/311.127Hz) */
-    playRed = (time: number = 420) => this.playTone(310, time);
+    playRed = (time: number = 420) => this.playTone(310, time, Colors.RED);
     /** Plays the Yellow Tone: 252Hz (B3/247.942Hz) */
-    playYellow = (time: number = 420) => this.playTone(252, time);
+    playYellow = (time: number = 420) => this.playTone(252, time, Colors.YELLOW);
     /** Plays the Blue Tone: 209Hz (G#3/207.652Hz) */
-    playBlue = (time: number = 420) => this.playTone(209, time);
+    playBlue = (time: number = 420) => this.playTone(209, time, Colors.BLUE);
     /** Plays the Fail Tone: 42Hz, defaults to 1.5s */
     playLose = (time: number = 1500) => this.playTone(42, time);
+    /** Just a Promisified Delay mechanism to support pauses in playback */
+    playDelay(time: number): Promise<boolean> {
+        return new Promise(r => setTimeout(r, time));
+    }
+
+    /**
+     * Produces an Iterator that we can pass to runIter. Accepts an array of
+     * Colors or 0 an a time to play each tone/delay.
+     *
+     * @param {(([Colors | 0, number])[])} sequence
+     * @returns {IterableIterator<Promise<boolean>>}
+     * @memberof Simon
+     */
+    *playSequence(sequence: ([Colors | 0, number])[]): IterableIterator<Promise<boolean>> {
+        this.isPlaying = true;
+        for (let note of sequence) {
+            switch (note[0]) {
+                case Colors.BLUE: yield this.playBlue(note[1]); break;
+                case Colors.RED: yield this.playRed(note[1]); break;
+                case Colors.GREEN: yield this.playGreen(note[1]); break;
+                case Colors.YELLOW: yield this.playYellow(note[1]); break;
+                case 0: yield this.playDelay(note[1]); break;
+            }
+        }
+    }
+
+    /** Simple function to iterate over a Promise Generator */
+    runIter(iter: IterableIterator<Promise<any>>) {
+        let next = iter.next();
+        if (!next.done) {
+            next.value.then((value) => {
+                this.runIter(iter);
+            })
+        }
+    }
 
     /**
      * Click Handler! Instead of wiring up individual onClicks on the HTML
@@ -206,34 +266,39 @@ class Simon {
      * @memberof Simon
      */
     clickHandler(ev: Event) {
+
         let fail = false;
-        if (this.isWaiting || !this.isPlaying) {
+        if (this.isWaiting || !this.isActive) {
             this.isWaiting = false;
             this.inputTime = performance.now();
             switch (ev.target) {
                 case this.greenElement:
-                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.GREEN || !this.isPlaying) {
+                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.GREEN || !this.isActive) {
+                        this.isHolding = true;
                         this.playGreen(500);
                     } else {
                         fail = true;
                     }
                     break;
                 case this.redElement:
-                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.RED || !this.isPlaying) {
+                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.RED || !this.isActive) {
+                        this.isHolding = true;
                         this.playRed(500);
                     } else {
                         fail = true;
                     }
                     break;
                 case this.blueElement:
-                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.BLUE || !this.isPlaying) {
+                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.BLUE || !this.isActive) {
+                        this.isHolding = true;
                         this.playBlue(500);
                     } else {
                         fail = true;
                     }
                     break;
                 case this.yellowElement:
-                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.YELLOW || !this.isPlaying) {
+                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.YELLOW || !this.isActive) {
+                        this.isHolding = true;
                         this.playYellow(500);
                     } else {
                         fail = true;
@@ -305,14 +370,14 @@ class Simon {
     loseGame() {
         console.log('Game lost!');
         this.playLose();
-        this.isPlaying = false;
+        this.isActive = false;
         this.isWaiting = false;
         this.lastMoves = [...this.currentMoves];
     }
 
     start() {
         console.log('start!');
-        this.isPlaying = true;
+        this.isActive = true;
         this.isWaiting = false;
         this.startTime = performance.now();
         this.addMove();
