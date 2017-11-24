@@ -80,11 +80,15 @@ declare const webkitAudioContext: AudioContext;
 // const volume = 0.25;
 const volume = 0.05;
 
-enum Colors {
+enum Tones {
+    SILENT = 0,
     YELLOW = 1,
     BLUE = 2,
     RED = 3,
-    GREEN = 4
+    GREEN = 4,
+    ERROR = 5,
+    FANCY4 = 6,
+    FANCY2 = 7
 }
 
 class Simon {
@@ -92,7 +96,7 @@ class Simon {
     private gainNode: GainNode;
     private game: 1 | 2 | 3;
     private level: 1 | 2 | 3 | 4;
-    private rng = 0;
+    private rng = 1;
     private isActive = false;
     private isWaiting = false;
     private isHolding = false;
@@ -117,9 +121,9 @@ class Simon {
     private longestButton: HTMLButtonElement;
 
     // Keep track of longest streak, last streak, and current streak;
-    private lastMoves: Colors[] = [];
-    private longestMoves: Colors[] = [];
-    private currentMoves: Colors[] = [];
+    private lastMoves: Tones[] = [];
+    private longestMoves: Tones[] = [];
+    private currentMoves: Tones[] = [];
 
 
     constructor() {
@@ -188,16 +192,16 @@ class Simon {
      * @param {number} time
      * @memberof Simon
      */
-    playTone(freq: number, time: number, color: Colors = 0): Promise<boolean> { // TODO: Replace this with Promises? Hmmm.
+    playTone(freq: number, time: number, color: Tones = 0): Promise<boolean> { // TODO: Replace this with Promises? Hmmm.
         return new Promise((resolve, reject) => {
 
             const oscillator = this.ctx.createOscillator();
             let el: HTMLElement = this.boardElement;
             switch (color) {
-                case Colors.BLUE: el = this.blueElement; break;
-                case Colors.GREEN: el = this.greenElement; break;
-                case Colors.RED: el = this.redElement; break;
-                case Colors.YELLOW: el = this.yellowElement; break;
+                case Tones.BLUE: el = this.blueElement; break;
+                case Tones.GREEN: el = this.greenElement; break;
+                case Tones.RED: el = this.redElement; break;
+                case Tones.YELLOW: el = this.yellowElement; break;
             }
             oscillator.type = 'square';
             oscillator.frequency.value = freq;
@@ -212,13 +216,13 @@ class Simon {
         });
     }
     /** Plays the Green Tone: 415Hz (G#4/415.305Hz) */
-    playGreen = (time: number = 420) => this.playTone(415, time, Colors.GREEN);
+    playGreen = (time: number = 420) => this.playTone(415, time, Tones.GREEN);
     /** Plays the Red Tone: 310Hz (D#4/311.127Hz) */
-    playRed = (time: number = 420) => this.playTone(310, time, Colors.RED);
+    playRed = (time: number = 420) => this.playTone(310, time, Tones.RED);
     /** Plays the Yellow Tone: 252Hz (B3/247.942Hz) */
-    playYellow = (time: number = 420) => this.playTone(252, time, Colors.YELLOW);
+    playYellow = (time: number = 420) => this.playTone(252, time, Tones.YELLOW);
     /** Plays the Blue Tone: 209Hz (G#3/207.652Hz) */
-    playBlue = (time: number = 420) => this.playTone(209, time, Colors.BLUE);
+    playBlue = (time: number = 420) => this.playTone(209, time, Tones.BLUE);
     /** Plays the Fail Tone: 42Hz, defaults to 1.5s */
     playLose = (time: number = 1500) => this.playTone(42, time);
     /** Just a Promisified Delay mechanism to support pauses in playback */
@@ -226,25 +230,87 @@ class Simon {
         return new Promise(r => setTimeout(r, time));
     }
 
+    playFancy = (four: boolean = true) => {
+        let promises: Promise<boolean>[] = [];
+        promises.push(this.playRed(100));
+        promises.push(this.playYellow(100));
+        if (four) {
+            promises.push(this.playGreen(100));
+            promises.push(this.playBlue(100));
+        }
+        return Promise.all(promises);
+    }
+
+    playVictory(fancy?: boolean) {
+        let prev = this.currentMoves[this.currentMoves.length - 1];
+        let sequence: [Tones, number][];
+        if (!fancy && prev) {
+            sequence = [
+                [Tones.SILENT, 800],
+                [prev, 20], [0, 20],
+                [prev, 70], [0, 20],
+                [prev, 70], [0, 20],
+                [prev, 70], [0, 20],
+                [prev, 70], [0, 20],
+                [prev, 70], [0, 20]
+            ];
+        } else {
+            sequence = [
+                [Tones.SILENT, 800],
+                [Tones.RED, 100], [0, 20],
+                [Tones.YELLOW, 100], [0, 20],
+                [Tones.BLUE, 100], [0, 20],
+                [Tones.GREEN, 100], [0, 20],
+                [Tones.RED, 100], [0, 20],
+                [Tones.YELLOW, 100], [0, 20],
+                [Tones.BLUE, 100], [0, 20],
+                [Tones.GREEN, 100], [0, 20],
+                [Tones.RED, 100], [0, 20],
+                [Tones.YELLOW, 100], [0, 20],
+                [Tones.BLUE, 100], [0, 20],
+                [Tones.GREEN, 100], [0, 20],
+                [Tones.RED, 100], [0, 20],
+                [Tones.YELLOW, 100], [0, 20],
+                // [Tones.FANCY4, 100],
+                // [Tones.FANCY2, 100],
+                [Tones.ERROR, 800]
+            ];
+        }
+        this.runIter(this.playSequence(sequence));
+    }
+
+    playMoves(moves: Tones[] = this.currentMoves) {
+        let sequence: [Tones, number][] = [[Tones.SILENT, 800]];
+        for (let move of moves) {
+            sequence.push([move, this.delay], [Tones.SILENT, 50]);
+        }
+        this.runIter(this.playSequence(sequence));
+    }
+
     /**
      * Produces an Iterator that we can pass to runIter. Accepts an array of
      * Colors or 0 an a time to play each tone/delay.
      *
-     * @param {(([Colors | 0, number])[])} sequence
+     * @param {(([Tones, number])[])} sequence
      * @returns {IterableIterator<Promise<boolean>>}
      * @memberof Simon
      */
-    *playSequence(sequence: ([Colors | 0, number])[]): IterableIterator<Promise<boolean>> {
+    *playSequence(sequence: ([Tones, number])[]): IterableIterator<Promise<any>> {
         this.isPlaying = true;
         for (let note of sequence) {
             switch (note[0]) {
-                case Colors.BLUE: yield this.playBlue(note[1]); break;
-                case Colors.RED: yield this.playRed(note[1]); break;
-                case Colors.GREEN: yield this.playGreen(note[1]); break;
-                case Colors.YELLOW: yield this.playYellow(note[1]); break;
-                case 0: yield this.playDelay(note[1]); break;
+                case Tones.BLUE: yield this.playBlue(note[1]); break;
+                case Tones.RED: yield this.playRed(note[1]); break;
+                case Tones.GREEN: yield this.playGreen(note[1]); break;
+                case Tones.YELLOW: yield this.playYellow(note[1]); break;
+                case Tones.SILENT: yield this.playDelay(note[1]); break;
+                case Tones.ERROR: yield this.playLose(note[1]); break;
+                case Tones.FANCY4: yield this.playFancy(); break;
+                case Tones.FANCY2: yield this.playFancy(false); break;
             }
         }
+        this.isPlaying = false;
+        yield Promise.resolve(false);
     }
 
     /** Simple function to iterate over a Promise Generator */
@@ -273,7 +339,7 @@ class Simon {
             this.inputTime = performance.now();
             switch (ev.target) {
                 case this.greenElement:
-                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.GREEN || !this.isActive) {
+                    if (this.currentMoves[this.currentMoves.length - 1] === Tones.GREEN || !this.isActive) {
                         this.isHolding = true;
                         this.playGreen(500);
                     } else {
@@ -281,7 +347,7 @@ class Simon {
                     }
                     break;
                 case this.redElement:
-                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.RED || !this.isActive) {
+                    if (this.currentMoves[this.currentMoves.length - 1] === Tones.RED || !this.isActive) {
                         this.isHolding = true;
                         this.playRed(500);
                     } else {
@@ -289,7 +355,7 @@ class Simon {
                     }
                     break;
                 case this.blueElement:
-                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.BLUE || !this.isActive) {
+                    if (this.currentMoves[this.currentMoves.length - 1] === Tones.BLUE || !this.isActive) {
                         this.isHolding = true;
                         this.playBlue(500);
                     } else {
@@ -297,7 +363,7 @@ class Simon {
                     }
                     break;
                 case this.yellowElement:
-                    if (this.currentMoves[this.currentMoves.length - 1] === Colors.YELLOW || !this.isActive) {
+                    if (this.currentMoves[this.currentMoves.length - 1] === Tones.YELLOW || !this.isActive) {
                         this.isHolding = true;
                         this.playYellow(500);
                     } else {
@@ -350,20 +416,21 @@ class Simon {
         const delay = this.delay;
         this.currentMoves.push(this.rng);
         this.inputTime = performance.now() + delay;
-        switch (this.rng) {
-            case Colors.BLUE:
-                this.playBlue(delay);
-                break;
-            case Colors.RED:
-                this.playRed(delay);
-                break;
-            case Colors.YELLOW:
-                this.playYellow(delay);
-                break;
-            case Colors.GREEN:
-                this.playGreen(delay);
-                break;
-        }
+        // switch (this.rng) {
+        //     case Tones.BLUE:
+        //         this.playBlue(delay);
+        //         break;
+        //     case Tones.RED:
+        //         this.playRed(delay);
+        //         break;
+        //     case Tones.YELLOW:
+        //         this.playYellow(delay);
+        //         break;
+        //     case Tones.GREEN:
+        //         this.playGreen(delay);
+        //         break;
+        // }
+        this.playMoves();
         this.isWaiting = true;
     }
 
