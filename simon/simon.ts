@@ -97,9 +97,13 @@ class Simon {
     private game: 1 | 2 | 3;
     private level: 1 | 2 | 3 | 4;
     private rng = 1;
+    /** game has been started */
     private isActive = false;
+    /** game is waiting for player input */
     private isWaiting = false;
+    /** game is waiting to start its turn */
     private isHolding = false;
+    /** game is playing a sequence */
     private isPlaying = false;
     private currentlyPlaying: IterableIterator<boolean>;
     private hasWon = false;
@@ -124,6 +128,8 @@ class Simon {
     private lastMoves: Tones[] = [];
     private longestMoves: Tones[] = [];
     private currentMoves: Tones[] = [];
+    private playedMoves: Tones[] = [];
+    private playedIndex: number = 0;
 
 
     constructor() {
@@ -169,18 +175,14 @@ class Simon {
         } else {
             this.rng++;
         }
-        if (this.isWaiting) {
-            if (now >= this.inputTime + 3000) {
-                this.loseGame();
-            }
-        } else if (this.isActive) {
-            // This is where we process the system's move...
-        } else if (this.isHolding) {
+         if (this.isHolding) {
             if (now >= this.inputTime + 800) {
                 this.addMove();
             }
-            // } else if (this.isPlaying) {
-            // console.log(this.currentlyPlaying.next());
+        } else if (this.isWaiting) {
+            if (now >= this.inputTime + 3000) {
+                this.loseGame();
+            }
         }
         requestAnimationFrame(this.tick.bind(this));
     }
@@ -192,7 +194,7 @@ class Simon {
      * @param {number} time
      * @memberof Simon
      */
-    playTone(freq: number, time: number, color: Tones = 0): Promise<boolean> { // TODO: Replace this with Promises? Hmmm.
+    playTone(freq: number, time: number, color: Tones = 0): Promise<boolean> {
         return new Promise((resolve, reject) => {
 
             const oscillator = this.ctx.createOscillator();
@@ -332,63 +334,8 @@ class Simon {
      * @memberof Simon
      */
     clickHandler(ev: Event) {
-
-        let fail = false;
-        if (this.isWaiting || !this.isActive) {
-            this.isWaiting = false;
-            this.inputTime = performance.now();
-            switch (ev.target) {
-                case this.greenElement:
-                    if (this.currentMoves[this.currentMoves.length - 1] === Tones.GREEN || !this.isActive) {
-                        this.isHolding = true;
-                        this.playGreen(500);
-                    } else {
-                        fail = true;
-                    }
-                    break;
-                case this.redElement:
-                    if (this.currentMoves[this.currentMoves.length - 1] === Tones.RED || !this.isActive) {
-                        this.isHolding = true;
-                        this.playRed(500);
-                    } else {
-                        fail = true;
-                    }
-                    break;
-                case this.blueElement:
-                    if (this.currentMoves[this.currentMoves.length - 1] === Tones.BLUE || !this.isActive) {
-                        this.isHolding = true;
-                        this.playBlue(500);
-                    } else {
-                        fail = true;
-                    }
-                    break;
-                case this.yellowElement:
-                    if (this.currentMoves[this.currentMoves.length - 1] === Tones.YELLOW || !this.isActive) {
-                        this.isHolding = true;
-                        this.playYellow(500);
-                    } else {
-                        fail = true;
-                    }
-                    break;
-                case this.startButton:
-                    this.start();
-                    break;
-                case this.lastButton:
-                    this.last();
-                    break;
-                case this.longestButton:
-                    this.longest();
-                    break;
-                case this.modeElement:
-                case this.levelElement:
-                default:
-                    // console.log(ev.target);
-                    break;
-            }
-        }
         if ((ev.target as HTMLElement).nodeName === 'INPUT') {
             const el: HTMLInputElement = ev.target as HTMLInputElement;
-            // console.log(el.id, el.name, el.value);
             if (el.name === 'mode-selector') {
                 this.setGame(parseInt(el.value));
             }
@@ -396,9 +343,62 @@ class Simon {
                 this.setLevel(parseInt(el.value));
             }
         }
-        if (fail) {
-            this.loseGame();
+        if (this.isPlaying && !this.isWaiting) {
+            return;
         }
+        let fail = false;
+        if (this.isWaiting || !this.isActive) {
+            // Gives us a way to cheat using the mode/level elements for now..
+            let playedColor: Tones = this.currentMoves[this.playedIndex];
+            this.isWaiting = false;
+            this.inputTime = performance.now();
+            switch (ev.target) {
+                case this.greenElement: playedColor = Tones.GREEN; break;
+                case this.redElement: playedColor = Tones.RED; break;
+                case this.blueElement: playedColor = Tones.BLUE; break;
+                case this.yellowElement: playedColor = Tones.YELLOW; break;
+                case this.startButton: return this.start();
+                case this.lastButton: return this.last();
+                case this.longestButton: return this.longest();
+                case this.modeElement:
+                case this.levelElement:
+                default: break;
+            }
+
+            this.playedMoves.push(playedColor);
+
+            if (playedColor === this.currentMoves[this.playedIndex]) {
+                if (this.playedIndex >= this.longestMoves.length) {
+                    this.longestMoves = [...this.playedMoves];
+                }
+                if (this.playedIndex >= this.currentMoves.length - 1) {
+                    this.playedIndex = 0;
+                    this.isHolding = true;
+                } else {
+                    this.playedIndex++;
+                    this.isWaiting = true;
+                }
+
+                switch (playedColor) {
+                    case Tones.GREEN: this.playGreen(250); break;
+                    case Tones.RED: this.playRed(250); break;
+                    case Tones.BLUE: this.playBlue(250); break;
+                    case Tones.YELLOW: this.playYellow(250); break;
+                }
+            } else {
+                if (this.isActive) {
+                    this.loseGame();
+                } else {
+                    switch (playedColor) {
+                        case Tones.GREEN: this.playGreen(500); break;
+                        case Tones.RED: this.playRed(500); break;
+                        case Tones.BLUE: this.playBlue(500); break;
+                        case Tones.YELLOW: this.playYellow(500); break;
+                    }
+                }
+            }
+        }
+
     }
 
     get delay() {
@@ -413,25 +413,14 @@ class Simon {
     }
 
     addMove() {
-        const delay = this.delay;
+        const delay = this.delay + 20;
+        this.isHolding = false;
         this.currentMoves.push(this.rng);
-        this.inputTime = performance.now() + delay;
-        // switch (this.rng) {
-        //     case Tones.BLUE:
-        //         this.playBlue(delay);
-        //         break;
-        //     case Tones.RED:
-        //         this.playRed(delay);
-        //         break;
-        //     case Tones.YELLOW:
-        //         this.playYellow(delay);
-        //         break;
-        //     case Tones.GREEN:
-        //         this.playGreen(delay);
-        //         break;
-        // }
+        this.inputTime = performance.now() + delay * this.currentMoves.length;
+        this.playedMoves = [];
         this.playMoves();
-        this.isWaiting = true;
+        setTimeout(() => this.isWaiting = true, delay - 100);
+        // this.isWaiting = true;
     }
 
     loseGame() {
@@ -439,7 +428,11 @@ class Simon {
         this.playLose();
         this.isActive = false;
         this.isWaiting = false;
+        this.isHolding = false;
         this.lastMoves = [...this.currentMoves];
+        this.currentMoves = [];
+        this.playedMoves = [];
+        this.playedIndex = 0;
     }
 
     start() {
