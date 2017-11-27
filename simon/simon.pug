@@ -1,5 +1,6 @@
 header
     h1 Simon Says BOO!
+    p#counter ##
 main
     #board
         #top
@@ -15,9 +16,9 @@ main
                     .switches
                         input(type="radio" id="mode-1" name="mode-selector" value="1" checked)
                         label(for="mode-1") 1
-                        input(type="radio" id="mode-2" name="mode-selector" value="2")
+                        input(type="radio" id="mode-2" name="mode-selector" value="2" disabled)
                         label(for="mode-2") 2
-                        input(type="radio" id="mode-3" name="mode-selector" value="3")
+                        input(type="radio" id="mode-3" name="mode-selector" value="3" disabled)
                         label(for="mode-3") 3
                 #level
                     .switch-title Level

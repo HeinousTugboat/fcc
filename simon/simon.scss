@@ -16,6 +16,9 @@ body {
     align-items: center;
     font-family: 'Roboto', sans-serif;
 }
+#counter {
+    text-align: center;
+}
 #board {
     display: flex;
     flex-direction: column;

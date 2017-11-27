@@ -91,6 +91,8 @@ enum Tones {
     FANCY2 = 7
 }
 
+const Levels = [0, 8, 14, 20, 31];
+
 class Simon {
     private ctx: AudioContext;
     private gainNode: GainNode;
@@ -109,10 +111,12 @@ class Simon {
     private hasWon = false;
     private startTime: number;
     private inputTime: number;
-    private currentGame: 1 | 2 | 3;
-    private currentLevel: 1 | 2 | 3 | 4;
+    private currentGame: 1 | 2 | 3 = 1;
+    private currentLevel: 1 | 2 | 3 | 4 = 1;
+    private counter = -1;
 
     // The div elements, pulled in by the constructor.
+    private counterElement: HTMLParagraphElement;
     private boardElement: HTMLDivElement;
     private yellowElement: HTMLDivElement;
     private redElement: HTMLDivElement;
@@ -143,6 +147,7 @@ class Simon {
             throw new Error('No Audio Context! ' + e);
         };
 
+        this.counterElement = document.getElementById('counter') as HTMLParagraphElement;
         this.boardElement = document.getElementById('board') as HTMLDivElement;
         this.yellowElement = document.getElementById('yellow') as HTMLDivElement;
         this.redElement = document.getElementById('red') as HTMLDivElement;
@@ -169,6 +174,10 @@ class Simon {
      * @memberof Simon
      */
     tick() {
+        if (this.counter !== this.currentMoves.length) {
+            this.counter = this.currentMoves.length;
+            this.counterElement.innerHTML = `# of steps: ${this.counter}`;
+        }
         const now = performance.now();
         if (this.rng >= 4) {
             this.rng = 1;
@@ -243,7 +252,7 @@ class Simon {
         return Promise.all(promises);
     }
 
-    playVictory(fancy?: boolean) {
+    playWin(fancy?: boolean) {
         let prev = this.currentMoves[this.currentMoves.length - 1];
         let sequence: [Tones, number][];
         if (!fancy && prev) {
@@ -343,7 +352,7 @@ class Simon {
                 this.setLevel(parseInt(el.value));
             }
         }
-        if (this.isPlaying && !this.isWaiting) {
+        if (this.isPlaying && !this.isWaiting && ev.target !== this.startButton) {
             return;
         }
         let fail = false;
@@ -368,10 +377,13 @@ class Simon {
             this.playedMoves.push(playedColor);
 
             if (playedColor === this.currentMoves[this.playedIndex]) {
+                this.lastMoves = [...this.playedMoves];
                 if (this.playedIndex >= this.longestMoves.length) {
                     this.longestMoves = [...this.playedMoves];
                 }
-                if (this.playedIndex >= this.currentMoves.length - 1) {
+                if (this.currentMoves.length >= Levels[this.currentLevel] && this.playedIndex >= this.currentMoves.length - 1) {
+                    this.winGame();
+                } else if (this.playedIndex >= this.currentMoves.length - 1) {
                     this.playedIndex = 0;
                     this.isHolding = true;
                 } else {
@@ -435,18 +447,41 @@ class Simon {
         this.playedIndex = 0;
     }
 
+    winGame() {
+        console.log('Game won!');
+        this.playWin((this.level === 4));
+        this.isActive = false;
+        this.isWaiting = false;
+        this.isHolding = false;
+        this.lastMoves = [... this.currentMoves];
+        this.currentMoves = [];
+        this.playedMoves = [];
+        this.playedIndex = 0;
+
+    }
+
     start() {
         console.log('start!');
         this.isActive = true;
         this.isWaiting = false;
+        this.isHolding = false;
+        this.currentMoves = [];
+        this.playedMoves = [];
+        this.playedIndex = 0;
         this.startTime = performance.now();
         this.addMove();
     }
     last() {
-        console.log('last!');
+        if (!this.isActive) {
+            this.playMoves(this.lastMoves);
+        }
+        // console.log('last!');
     }
     longest() {
-        console.log('longest!');
+        if (!this.isActive) {
+            this.playMoves(this.longestMoves);
+        }
+        // console.log('longest!');
     }
     setLevel(level: number) {
         console.log('setLevel', level);
